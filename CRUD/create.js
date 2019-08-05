@@ -1,12 +1,14 @@
-// eslint-disable-next-line import/no-unresolved
-const AWS = require("aws-sdk");
-
-const docClient = new AWS.DynamoDB.DocumentClient();
-
 /**
  * Create Item in table, 'createdAt' and 'updatedAt' timeStamps will be added in each item
  */
-async function create({ tableName, item, options = {}, verbose = false, forTrx = false }) {
+async function create({
+  docClient,
+  tableName,
+  item,
+  options = {},
+  verbose = false,
+  forTrx = false
+}) {
   let params;
   try {
     const timeStamp = Date.now();

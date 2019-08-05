@@ -1,12 +1,14 @@
-// eslint-disable-next-line import/no-unresolved
-const AWS = require("aws-sdk");
-
-const docClient = new AWS.DynamoDB.DocumentClient();
-
 /**
  * Deletes an item from the table
  */
-async function deleteItem({ tableName, key, options = {}, verbose = false, forTrx = false }) {
+async function deleteItem({
+  docClient,
+  tableName,
+  key,
+  options = {},
+  verbose = false,
+  forTrx = false
+}) {
   let params;
   try {
     if (!key) {

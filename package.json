@@ -31,5 +31,7 @@
   ],
   "author": "Chen Li",
   "license": "ISC",
-  "dependencies": {}
+  "dependencies": {
+    "aws-sdk": "^2.504.0"
+  }
 }

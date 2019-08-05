@@ -1,13 +1,10 @@
-// eslint-disable-next-line import/no-unresolved
-const AWS = require("aws-sdk");
 const { concatBatchFetchResult } = require("../helper");
-
-const docClient = new AWS.DynamoDB.DocumentClient();
 
 /**
  * Get all items from table
  * */
 async function getAll({
+  docClient,
   tableName,
   indexName = undefined,
   options = {},

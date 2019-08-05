@@ -1,10 +1,7 @@
-// eslint-disable-next-line import/no-unresolved
-const AWS = require("aws-sdk");
-
-const docClient = new AWS.DynamoDB.DocumentClient();
 const { buildKeyConditionExpressions, mergeOptions, concatBatchFetchResult } = require("../helper");
 
 async function query({
+  docClient,
   tableName,
   indexName = undefined,
   hashKey,

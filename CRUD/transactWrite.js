@@ -1,12 +1,7 @@
-// eslint-disable-next-line import/no-unresolved
-const AWS = require("aws-sdk");
-
-const docClient = new AWS.DynamoDB.DocumentClient();
-
 /**
  * Transact write from table
  */
-async function transactWrite({ transactions, options, verbose }) {
+async function transactWrite({ docClient, transactions, options, verbose }) {
   let params;
   try {
     const {

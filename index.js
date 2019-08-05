@@ -1,3 +1,4 @@
+const AWS = require("aws-sdk");
 const getItem = require("./CRUD/get");
 const createItem = require("./CRUD/create");
 const deleteItem = require("./CRUD/delete");
@@ -5,6 +6,8 @@ const updateItem = require("./CRUD/update");
 const queryItems = require("./CRUD/query");
 const getAllItems = require("./CRUD/getAll");
 const transactWrite = require("./CRUD/transactWrite");
+
+const docClient = new AWS.DynamoDB.DocumentClient();
 
 class Table {
   constructor({ name, indexes = [], hashKey, sortKey }) {
@@ -28,11 +31,6 @@ class Table {
    */
   isValidKey(key) {
     return key[this.hashKey] !== undefined;
-    // Object.keys(key).forEach(keyName => {
-    //   if (keyName !== this.hashKey && keyName !== this.sortKey) {
-    //     isValid = false;
-    //   }
-    // });
   }
 
   static transactWrite(
@@ -41,7 +39,7 @@ class Table {
     libOptions = { verbose: false, conditions: {} }
   ) {
     const { verbose, conditions } = libOptions;
-    return transactWrite({ transactions, options, verbose, conditions });
+    return transactWrite({ docClient, transactions, options, verbose, conditions });
   }
 
   get(key, options, libOptions = { verbose: false, forTrx: false }) {
@@ -50,12 +48,12 @@ class Table {
     }
 
     const { verbose, forTrx } = libOptions;
-    return getItem({ tableName: this.tableName, key, options, verbose, forTrx });
+    return getItem({ docClient, tableName: this.tableName, key, options, verbose, forTrx });
   }
 
   create(item, options, libOptions = { verbose: false, forTrx: false }) {
     const { verbose, forTrx } = libOptions;
-    return createItem({ tableName: this.tableName, item, options, verbose, forTrx });
+    return createItem({ docClient, tableName: this.tableName, item, options, verbose, forTrx });
   }
 
   delete(key, options, libOptions = { verbose: false, forTrx: false }) {
@@ -63,7 +61,7 @@ class Table {
       throw new Error(`Key param contains invalid keyName`);
     }
     const { verbose, forTrx } = libOptions;
-    return deleteItem({ tableName: this.tableName, key, options, verbose, forTrx });
+    return deleteItem({ docClient, tableName: this.tableName, key, options, verbose, forTrx });
   }
 
   update(key, newFields, options, libOptions = { verbose: false, forTrx: false }) {
@@ -71,7 +69,15 @@ class Table {
       throw new Error(`Key param contains invalid keyName`);
     }
     const { verbose, forTrx } = libOptions;
-    return updateItem({ tableName: this.tableName, key, newFields, options, verbose, forTrx });
+    return updateItem({
+      docClient,
+      tableName: this.tableName,
+      key,
+      newFields,
+      options,
+      verbose,
+      forTrx
+    });
   }
 
   query(
@@ -92,6 +98,7 @@ class Table {
 
     const { verbose, pagination } = libOptions;
     return queryItems({
+      docClient,
       tableName: this.tableName,
       indexName,
       hashKey,
@@ -108,7 +115,14 @@ class Table {
   getAll(param = {}, options, libOptions = { verbose: false, pagination: true }) {
     const { indexName } = param;
     const { verbose, pagination } = libOptions;
-    return getAllItems({ tableName: this.tableName, indexName, options, pagination, verbose });
+    return getAllItems({
+      docClient,
+      tableName: this.tableName,
+      indexName,
+      options,
+      pagination,
+      verbose
+    });
   }
 }
 

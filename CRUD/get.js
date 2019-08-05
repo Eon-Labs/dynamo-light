@@ -1,12 +1,7 @@
-// eslint-disable-next-line import/no-unresolved
-const AWS = require("aws-sdk");
-
-const docClient = new AWS.DynamoDB.DocumentClient();
-
 /**
  * Get Item from table
  */
-async function get({ tableName, key, options = {}, verbose = false, forTrx = false }) {
+async function get({ docClient, tableName, key, options = {}, verbose = false, forTrx = false }) {
   let params;
   try {
     /**
