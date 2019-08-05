@@ -15,29 +15,15 @@ It provides the following common methods for each dynamodb table / indexes:
 npm install --save aqua-dynamo
 ```
 
-### Prerequisite
+### AWS Configurations
 
-- Have your [aws credentials configured](https://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/setting-credentials-node.html) properly.
-  For example, you can configure it in `~/.aws/credentials` file.
+Set AWS configurations in environment variables:
 
-- Have your [aws region](https://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/setting-region.html) configured using **environment variable**. Here is an example to set the environment variable at run time,
-
-  Mac:
-
-  - `AWS_REGION=us-east-1 node app.js`
-
-  Windows:
-
-  - Install [cross-env](https://www.npmjs.com/package/cross-env) npm package
-
-    `npm install --save-dev cross-env`
-
-  - Run
-
-    `cross-env AWS_REGION=us-east-1 node app.js`
-
-- This package is intended to be used in services such as AWS Lambda, which has aws-sdk installed by default in the environment. Therefore, aws-sdk is not listed as a dependency for this package to reduce package size. During development, make sure you have aws-sdk installed globally if you haven't done so already `npm install aws-sdk -g`. If you are working with an environment that doesn't have aws-sdk installed, make sure you install the aws-sdk pacakge in your project that uses `aqua-dynamo`.
-
+```javascript
+export AWS_ACCESS_KEY_ID="Your AWS Access Key ID"
+export AWS_SECRET_ACCESS_KEY="Your AWS Secret Access Key"
+export AWS_REGION="us-west-2"
+```
 
 ### Usage Example:
 

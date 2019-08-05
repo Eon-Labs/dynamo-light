@@ -20,7 +20,7 @@ class Table {
     const tableInfo = await dynamodb.describeTable({ TableName: this.tableName }).promise();
     console.log("tableInfo", tableInfo);
     this.initialized = true;
-    process.exit();
+    // process.exit();
   }
 
   /**

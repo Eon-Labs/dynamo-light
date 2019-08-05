@@ -1,0 +1,82 @@
+const Table = require("../../index");
+
+const rawSpeechTable = new Table("Clevo-Processed-Speech-Table");
+// const tableWithSortKey = new Transaction();
+
+console.error = jest.fn();
+
+describe("Create method will work in a simple table", () => {
+  test("Create an item with partition key", async () => {
+    const partitionKey = `localFile_${Math.random()
+      .toFixed(6)
+      .replace(".", "")}`;
+    const item = {
+      fileName: partitionKey,
+      totalEmoScore: "5678"
+    };
+    const key = {
+      fileName: partitionKey
+    };
+    await rawSpeechTable.create(item);
+    const fetchData = await rawSpeechTable.get(key);
+    expect(fetchData).not.toBeNull();
+    expect(fetchData.Item.key).toBe(partitionKey);
+    expect(fetchData.Item.totalEmoScore).toBe("5678");
+  });
+
+  //   test("Create an item with partition and sortkey", async () => {
+  //     const item = {
+  //       username: "woojie",
+  //       itemDateTime: 12345,
+  //       isCompleted: false,
+  //       symbol: "icx",
+  //       transaction: "bad type"
+  //     };
+  //     const key = {
+  //       username: "woojie",
+  //       itemDateTime: 12345
+  //     };
+  //     await tableWithSortKey.create(item);
+  //     const fetchData = await tableWithSortKey.get(key);
+  //     expect(fetchData).not.toBeNull();
+  //     expect(fetchData.Item.username).toBe("woojie");
+  //     expect(fetchData.Item.symbol).toBe("icx");
+  //   });
+
+  //   test("Empty input will be caught", async () => {
+  //     expect.assertions(3);
+  //     try {
+  //       await tableWithPrimaryKey.create();
+  //     } catch (e) {
+  //       expect(console.error).toHaveBeenCalled();
+  //       expect(e).not.toBeNull();
+  //       expect(e.message).toMatch(
+  //         "One or more parameter values were invalid: Missing the key key in the item"
+  //       );
+  //     }
+  //   });
+
+  //   test("Invalid input will be caught", async () => {
+  //     expect.assertions(3);
+  //     try {
+  //       await tableWithPrimaryKey.create({ fakeKey: "wrong name for hashKey" });
+  //     } catch (e) {
+  //       expect(console.error).toHaveBeenCalled();
+  //       expect(e).not.toBeNull();
+  //       expect(e.message).toMatch(
+  //         "One or more parameter values were invalid: Missing the key key in the item"
+  //       );
+  //     }
+  //   });
+  //   afterAll(async () => {
+  //     await Promise.all([
+  //       tableWithPrimaryKey.delete({
+  //         key: "create1234"
+  //       }),
+  //       tableWithSortKey.delete({
+  //         username: "woojie",
+  //         itemDateTime: 12345
+  //       })
+  //     ]);
+  //   });
+});
