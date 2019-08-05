@@ -1,0 +1,23 @@
+{
+  "extends": ["airbnb", "prettier", "plugin:prettier/recommended"],
+  "env": {
+    "browser": true,
+    "node": true,
+    "jest": true
+  },
+  "plugins": ["prettier"],
+  "rules": {
+    "prettier/prettier": ["error"],
+    "no-console": "off",
+    "no-use-before-define": "off",
+    "no-unused-expressions": ["error", { "allowShortCircuit": true }],
+    "no-restricted-syntax": [0, "ForInStatement", "ForOfStatement"],
+    "prefer-destructuring": [
+      "error",
+      {
+        "array": false,
+        "object": true
+      }
+    ]
+  }
+}
