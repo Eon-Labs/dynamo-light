@@ -7,22 +7,20 @@ const queryItems = require("./CRUD/query");
 const getAllItems = require("./CRUD/getAll");
 const transactWrite = require("./CRUD/transactWrite");
 
+const dynamodb = new AWS.DynamoDB();
 const docClient = new AWS.DynamoDB.DocumentClient();
 
 class Table {
-  constructor({ name, indexes = [], hashKey, sortKey }) {
+  constructor(name) {
     this.tableName = name;
-    this.hashKey = hashKey;
-    this.sortKey = sortKey;
-    this.indexMap = new Map();
-    indexes.forEach(index => {
-      if (!index.name || !index.hashKey) {
-        throw new Error(
-          `Init Failed: indexes array expect item in format {name, hashKey, [sortKey]}`
-        );
-      }
-      this.indexMap.set(index.name, index);
-    });
+    this.initialized = false;
+  }
+
+  async initTable() {
+    const tableInfo = await dynamodb.describeTable({ TableName: this.tableName }).promise();
+    console.log("tableInfo", tableInfo);
+    this.initialized = true;
+    process.exit();
   }
 
   /**
@@ -42,7 +40,10 @@ class Table {
     return transactWrite({ docClient, transactions, options, verbose, conditions });
   }
 
-  get(key, options, libOptions = { verbose: false, forTrx: false }) {
+  async get(key, options, libOptions = { verbose: false, forTrx: false }) {
+    if (!this.initialized) {
+      await this.initTable();
+    }
     if (!this.isValidKey(key)) {
       throw new Error(`key is invalid`);
     }
@@ -51,12 +52,18 @@ class Table {
     return getItem({ docClient, tableName: this.tableName, key, options, verbose, forTrx });
   }
 
-  create(item, options, libOptions = { verbose: false, forTrx: false }) {
+  async create(item, options, libOptions = { verbose: false, forTrx: false }) {
+    if (!this.initialized) {
+      await this.initTable();
+    }
     const { verbose, forTrx } = libOptions;
     return createItem({ docClient, tableName: this.tableName, item, options, verbose, forTrx });
   }
 
-  delete(key, options, libOptions = { verbose: false, forTrx: false }) {
+  async delete(key, options, libOptions = { verbose: false, forTrx: false }) {
+    if (!this.initialized) {
+      await this.initTable();
+    }
     if (!this.isValidKey(key)) {
       throw new Error(`Key param contains invalid keyName`);
     }
@@ -64,7 +71,11 @@ class Table {
     return deleteItem({ docClient, tableName: this.tableName, key, options, verbose, forTrx });
   }
 
-  update(key, newFields, options, libOptions = { verbose: false, forTrx: false }) {
+  async update(key, newFields, options, libOptions = { verbose: false, forTrx: false }) {
+    if (!this.initialized) {
+      await this.initTable();
+    }
+
     if (!this.isValidKey(key)) {
       throw new Error(`Key param contains invalid keyName`);
     }
@@ -80,11 +91,13 @@ class Table {
     });
   }
 
-  query(
+  async query(
     { indexName, hashKeyValue, sortKeyOperator, sortKeyValue },
     options,
     libOptions = { verbose: false, pagination: true }
   ) {
+    if (!this.initialized) await this.initTable();
+
     const index = this.indexMap.get(indexName);
     if (indexName && !index) {
       throw new Error(`Index ${indexName} doesn't belong to table ${this.tableName}`);
@@ -112,7 +125,8 @@ class Table {
     });
   }
 
-  getAll(param = {}, options, libOptions = { verbose: false, pagination: true }) {
+  async getAll(param = {}, options, libOptions = { verbose: false, pagination: true }) {
+    if (!this.initialized) await this.initTable();
     const { indexName } = param;
     const { verbose, pagination } = libOptions;
     return getAllItems({
