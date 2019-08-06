@@ -11,6 +11,10 @@ const dynamodb = new AWS.DynamoDB();
 const docClient = new AWS.DynamoDB.DocumentClient();
 
 class Table {
+  static transactWrite(transactions, options = {}, libOptions = { verbose: false, conditions: {} }) {
+    const { verbose, conditions } = libOptions;
+    return transactWrite({ docClient, transactions, options, verbose, conditions });
+  }
   constructor(name) {
     this.tableName = name;
     this.initialized = false;
@@ -29,15 +33,6 @@ class Table {
    */
   isValidKey(key) {
     return key[this.hashKey] !== undefined;
-  }
-
-  static transactWrite(
-    transactions,
-    options = {},
-    libOptions = { verbose: false, conditions: {} }
-  ) {
-    const { verbose, conditions } = libOptions;
-    return transactWrite({ docClient, transactions, options, verbose, conditions });
   }
 
   async get(key, options, libOptions = { verbose: false, forTrx: false }) {
@@ -96,7 +91,9 @@ class Table {
     options,
     libOptions = { verbose: false, pagination: true }
   ) {
-    if (!this.initialized) await this.initTable();
+    if (!this.initialized) {
+      await this.initTable();
+    }
 
     const index = this.indexMap.get(indexName);
     if (indexName && !index) {
@@ -126,7 +123,9 @@ class Table {
   }
 
   async getAll(param = {}, options, libOptions = { verbose: false, pagination: true }) {
-    if (!this.initialized) await this.initTable();
+    if (!this.initialized) {
+      await this.initTable();
+    }
     const { indexName } = param;
     const { verbose, pagination } = libOptions;
     return getAllItems({

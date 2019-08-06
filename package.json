@@ -1,24 +1,33 @@
 {
   "name": "dynamo-light",
   "version": "0.0.1",
-  "description": "A light weight library to read/write dynamodb tables",
-  "main": "index.js",
+  "description": "A light weight library to use dynamodb tables",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
-    "test": "jest"
+    "build": "tsc",
+    "test": "jest --config jestconfig.json",
+    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
+    "lint": "tslint -p tsconfig.json",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm test && npm run lint",
+    "preversion": "npm run lint",
+    "version": "npm run format && git add -A src",
+    "postversion": "git push && git push --tags"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.504.0"
   },
   "devDependencies": {
-    "babel-eslint": "^10.0.1",
-    "eslint": "^5.6.0",
-    "eslint-config-airbnb": "^17.1.0",
-    "eslint-config-prettier": "^4.0.0",
-    "eslint-config-react-app": "^3.0.7",
-    "eslint-plugin-flowtype": "^2.50.3",
-    "eslint-plugin-import": "^2.16.0",
-    "eslint-plugin-jsx-a11y": "^6.2.1",
-    "eslint-plugin-prettier": "^3.0.1",
-    "eslint-plugin-react": "^7.12.4",
+    "@types/jest": "^24.0.17",
+    "@types/node": "^12.6.9",
+    "dotenv": "^8.0.0",
     "jest": "^24.8.0",
-    "prettier": "^1.16.4"
+    "prettier": "^1.18.2",
+    "ts-jest": "^24.0.2",
+    "tslint": "^5.18.0",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^3.5.3"
   },
   "keywords": [
     "dyanmodb",
@@ -28,10 +37,9 @@
     "model",
     "schema"
   ],
+  "files": [
+    "lib/**/*"
+  ],
   "author": "Chen Li",
-  "license": "ISC",
-  "dependencies": {
-    "aws-sdk": "^2.504.0",
-    "dotenv": "^8.0.0"
-  }
+  "license": "ISC"
 }
