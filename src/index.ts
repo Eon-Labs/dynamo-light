@@ -1,4 +1,4 @@
-import AWS from "aws-sdk";
+import * as AWS from "aws-sdk"
 import createItem from "./CRUD/create";
 import deleteItem from "./CRUD/delete";
 import getItem from "./CRUD/get";
@@ -13,11 +13,11 @@ const docClient = new AWS.DynamoDB.DocumentClient();
 interface IIndex {
   name: string;
   partitionKey: string;
-  sortKey: string;
+  sortKey: string | undefined;
 }
 
 class Table {
-  public static transactWrite(transactions, options = {}, libOptions = { verbose: false, conditions: {} }) {
+  public static transactWrite(transactions: any, options = {}, libOptions = { verbose: false, conditions: {} }) {
     const { verbose, conditions } = libOptions;
     return transactWrite({ docClient, transactions, options, verbose });
   }
@@ -44,18 +44,22 @@ class Table {
      * Set partitionKey and sortKey
      */
     const { KeySchema, GlobalSecondaryIndexes } = tableInfo;
-    this.addKeysToObj(KeySchema, this);
+    const { partitionKey, sortKey } = this.getKeys(KeySchema);
+    this.partitionKey = partitionKey;
+    this.sortKey = sortKey;
 
     /**
      * Set indexes
      */
     for (const indexRecord of GlobalSecondaryIndexes) {
+      const { partitionKey, sortKey } = this.getKeys(indexRecord.KeySchema);
+      //   index.partitionKey = partitionKey;
+      //   index.sortKey = sortKey;
       const index: IIndex = {
         name: "UsernameIndex",
-        partitionKey: undefined,
-        sortKey: undefined
+        partitionKey: partitionKey as string,
+        sortKey
       };
-      this.addKeysToObj(indexRecord.KeySchema, index);
       this.indexMap.set(indexRecord.IndexName, index);
     }
   }
@@ -64,11 +68,14 @@ class Table {
    * Check if the key is valid for this table
    * @param {} key
    */
-  public isValidKey(key) {
+  public isValidKey(key: any) {
+    if (!this.partitionKey) {
+      return false;
+    }
     return key[this.partitionKey] !== undefined;
   }
 
-  public async get(key: string | , options, libOptions = { verbose: false, forTrx: false }) {
+  public async get(key: any, options: any, libOptions = { verbose: false, forTrx: false }) {
     if (!this.initialized) {
       await this.initTable();
     }
@@ -80,7 +87,7 @@ class Table {
     return getItem({ docClient, tableName: this.tableName, key, options, verbose, forTrx });
   }
 
-  public async create(item, options, libOptions = { verbose: false, forTrx: false }) {
+  public async create(item: any, options: any, libOptions = { verbose: false, forTrx: false }) {
     if (!this.initialized) {
       await this.initTable();
     }
@@ -88,7 +95,7 @@ class Table {
     return createItem({ docClient, tableName: this.tableName, item, options, verbose, forTrx });
   }
 
-  public async delete(key, options, libOptions = { verbose: false, forTrx: false }) {
+  public async delete(key: any, options: any, libOptions = { verbose: false, forTrx: false }) {
     if (!this.initialized) {
       await this.initTable();
     }
@@ -99,7 +106,7 @@ class Table {
     return deleteItem({ docClient, tableName: this.tableName, key, options, verbose, forTrx });
   }
 
-  public async update(key, newFields, options, libOptions = { verbose: false, forTrx: false }) {
+  public async update(key: any, newFields: any, options: any, libOptions = { verbose: false, forTrx: false }) {
     if (!this.initialized) {
       await this.initTable();
     }
@@ -120,8 +127,13 @@ class Table {
   }
 
   public async query(
-    { indexName, partitionKeyValue, sortKeyOperator, sortKeyValue },
-    options,
+    {
+      indexName,
+      partitionKeyValue,
+      sortKeyOperator,
+      sortKeyValue
+    }: { indexName: string; partitionKeyValue: string; sortKeyOperator: string; sortKeyValue: string },
+    options: any,
     libOptions = { verbose: false, pagination: true }
   ) {
     if (!this.initialized) {
@@ -155,7 +167,7 @@ class Table {
     });
   }
 
-  public async getAll(param = {}, options, libOptions = { verbose: false, pagination: true }) {
+  public async getAll(param: any = {}, options: any, libOptions = { verbose: false, pagination: true }) {
     if (!this.initialized) {
       await this.initTable();
     }
@@ -171,15 +183,18 @@ class Table {
     });
   }
 
-  private addKeysToObj(KeySchema: any, obj: any) {
+  private getKeys(KeySchema: any) {
+    let partitionKey: string | undefined;
+    let sortKey: string | undefined;
     for (const { AttributeName, KeyType } of KeySchema) {
       if (KeyType === "HASH") {
-        obj.partitionKey = AttributeName;
+        partitionKey = AttributeName;
       }
       if (KeyType === "RANGE") {
-        obj.sortKey = AttributeName;
+        sortKey = AttributeName;
       }
     }
+    return { partitionKey, sortKey };
   }
 }
 

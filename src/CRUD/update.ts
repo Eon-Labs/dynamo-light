@@ -1,13 +1,10 @@
-// eslint-disable-next-line import/no-unresolved
-const AWS = require("aws-sdk");
-
-const docClient = new AWS.DynamoDB.DocumentClient();
 const api = require("../helper");
 
 /**
  * Update item in table
  * */
-async function update({
+export default async function update({
+  docClient,
   tableName,
   key,
   newFields: rawNewFields,
@@ -17,17 +14,13 @@ async function update({
 }) {
   let params;
   try {
-    const { ReturnValues = "ALL_NEW", createIfNotExist = false } = options;
+    const { ReturnValues = "ALL_NEW", createIfNotExist = false } = options as any;
     // Check for argument errors
-    if (!key || typeof key !== "object" || Object.keys(key) === 0) {
+    if (!key || typeof key !== "object" || Object.keys(key).length === 0) {
       console.error(`The key you gave was ${key}, which is invalid`);
       throw new Error("Update fail: argument `key` is invalid");
     }
-    if (
-      !rawNewFields ||
-      typeof rawNewFields !== "object" ||
-      Object.keys(rawNewFields).length === 0
-    ) {
+    if (!rawNewFields || typeof rawNewFields !== "object" || Object.keys(rawNewFields).length === 0) {
       console.error(`invalid newFields`, rawNewFields);
       throw new Error("Update fail: newFields is invalid");
     }
@@ -71,9 +64,7 @@ async function update({
     return data;
   } catch (err) {
     console.error(
-      `Unable to update in table ${tableName} for the following fields: ${JSON.stringify(
-        rawNewFields
-      )}`,
+      `Unable to update in table ${tableName} for the following fields: ${JSON.stringify(rawNewFields)}`,
       JSON.stringify(err),
       err.stack
     );
@@ -81,5 +72,3 @@ async function update({
     throw err;
   }
 }
-
-module.exports = update;

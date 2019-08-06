@@ -1,14 +1,14 @@
 const { buildKeyConditionExpressions, mergeOptions, concatBatchFetchResult } = require("../helper");
 
-async function query({
+export default async function query({
   docClient,
   tableName,
-  indexName = undefined,
-  hashKey,
-  hashKeyValue,
-  sortKey = undefined,
-  sortKeyOperator = undefined,
-  sortKeyValue = undefined,
+  indexName,
+  partitionKey,
+  partitionKeyValue,
+  sortKey,
+  sortKeyOperator,
+  sortKeyValue,
   options = {},
   pagination = false,
   verbose = false
@@ -18,9 +18,9 @@ async function query({
     /**
      * Check for errors
      */
-    if (!hashKey || !hashKeyValue) {
+    if (!partitionKey || !partitionKeyValue) {
       throw new Error(
-        `Query fail: argument hashKey - ${hashKey} or hashKeyValue ${hashKeyValue} is invalid`
+        `Query fail: argument partitionKey - ${partitionKey} or partitionKeyValue ${partitionKeyValue} is invalid`
       );
     }
     if (sortKey) {
@@ -33,8 +33,8 @@ async function query({
      * Update query options / params
      */
     const keyConditionExpressions = buildKeyConditionExpressions({
-      hashKey,
-      hashKeyValue,
+      partitionKey,
+      partitionKeyValue,
       sortKey,
       sortKeyOperator,
       sortKeyValue
@@ -64,20 +64,13 @@ async function query({
         params.Limit -= fetchedData.Items.length;
       }
       const noItemsToFetch = !fetchedData || !fetchedData.Items || fetchedData.Items.length === 0;
-      shouldKeepFetching =
-        !pagination && params.Limit > 0 && LastEvaluatedKey !== "undefined" && !noItemsToFetch;
+      shouldKeepFetching = !pagination && params.Limit > 0 && LastEvaluatedKey !== "undefined" && !noItemsToFetch;
     }
     verbose && console.log(`Successfully queried ${result.Count} items from table ${tableName}`);
     return result;
   } catch (error) {
-    console.error(
-      `Unable to query items from ${tableName}. Error JSON:`,
-      JSON.stringify(error),
-      error.stack
-    );
+    console.error(`Unable to query items from ${tableName}. Error JSON:`, JSON.stringify(error), error.stack);
     console.log("params", JSON.stringify(params));
     throw error;
   }
 }
-
-module.exports = query;

@@ -1,20 +1,13 @@
 /**
  * Deletes an item from the table
  */
-async function deleteItem({
-  docClient,
-  tableName,
-  key,
-  options = {},
-  verbose = false,
-  forTrx = false
-}) {
+export default async function deleteItem({ docClient, tableName, key, options = {}, verbose = false, forTrx = false }) {
   let params;
   try {
     if (!key) {
       throw new Error("key is undefined!");
     }
-    const { ReturnValues = "ALL_OLD" } = options;
+    const { ReturnValues = "ALL_OLD" } = options as any;
     params = {
       TableName: tableName,
       Key: key,
@@ -45,5 +38,3 @@ async function deleteItem({
     throw error;
   }
 }
-
-module.exports = deleteItem;

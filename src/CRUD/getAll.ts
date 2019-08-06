@@ -1,12 +1,12 @@
-const { concatBatchFetchResult } = require("../helper");
+import { concatBatchFetchResult } from "../helper";
 
 /**
  * Get all items from table
  * */
-async function getAll({
+export default async function getAll({
   docClient,
   tableName,
-  indexName = undefined,
+  indexName,
   options = {},
   pagination = false,
   verbose = false
@@ -35,14 +35,8 @@ async function getAll({
     verbose && console.log(`Successfully scanned ${result.Count} items from table ${tableName}`);
     return result;
   } catch (error) {
-    console.error(
-      `Unable to get all items from ${tableName}. Error JSON:`,
-      JSON.stringify(error),
-      error.stack
-    );
+    console.error(`Unable to get all items from ${tableName}. Error JSON:`, JSON.stringify(error), error.stack);
     console.log("params", JSON.stringify(params));
     throw error;
   }
 }
-
-module.exports = getAll;

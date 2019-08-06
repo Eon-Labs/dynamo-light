@@ -1,7 +1,7 @@
 /**
  * Transact write from table
  */
-async function transactWrite({ docClient, transactions, options, verbose }) {
+export default async function transactWrite({ docClient, transactions, options, verbose }) {
   let params;
   try {
     const { ClientRequestToken, ReturnConsumedCapacity = "TOTAL", ReturnItemCollectionMetrics = "NONE" } = options;
@@ -14,7 +14,7 @@ async function transactWrite({ docClient, transactions, options, verbose }) {
     };
 
     const data = await docClient.transactWrite(params).promise();
-    if (verbose) console.log(`Successfully performed transactionWrite`, data);
+    if (verbose) { console.log(`Successfully performed transactionWrite`, data); }
     return data;
   } catch (err) {
     console.error(
@@ -26,5 +26,3 @@ async function transactWrite({ docClient, transactions, options, verbose }) {
     throw err;
   }
 }
-
-module.exports = transactWrite;

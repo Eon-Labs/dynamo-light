@@ -91,4 +91,4 @@ principalTable.get("123123");
 principalTable.update("123casdc", { name: "123123", age: 112 });
 principalTable.update({ class: "370227", name: "asdfasdf" }, { name: "123123", age: 112 });
 principalTable.delete("123123");
-principalTable.update({ primaryKey: "370227", hashKey: "asdfasdf" }, { name: "123123", age: 112 });
+principalTable.update({ primaryKey: "370227", partitionKey: "asdfasdf" }, { name: "123123", age: 112 });
