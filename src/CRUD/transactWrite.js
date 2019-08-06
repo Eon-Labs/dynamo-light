@@ -4,11 +4,7 @@
 async function transactWrite({ docClient, transactions, options, verbose }) {
   let params;
   try {
-    const {
-      ClientRequestToken,
-      ReturnConsumedCapacity = "TOTAL",
-      ReturnItemCollectionMetrics = "NONE"
-    } = options;
+    const { ClientRequestToken, ReturnConsumedCapacity = "TOTAL", ReturnItemCollectionMetrics = "NONE" } = options;
 
     params = {
       TransactItems: transactions,
@@ -18,7 +14,7 @@ async function transactWrite({ docClient, transactions, options, verbose }) {
     };
 
     const data = await docClient.transactWrite(params).promise();
-    verbose && console.log(`Successfully performed transactionWrite`, data);
+    if (verbose) console.log(`Successfully performed transactionWrite`, data);
     return data;
   } catch (err) {
     console.error(
