@@ -1,4 +1,4 @@
-import * as AWS from "aws-sdk"
+import * as AWS from "aws-sdk";
 import createItem from "./CRUD/create";
 import deleteItem from "./CRUD/delete";
 import getItem from "./CRUD/get";
@@ -16,7 +16,7 @@ interface IIndex {
   sortKey: string | undefined;
 }
 
-class Table {
+export default class Table {
   public static transactWrite(transactions: any, options = {}, libOptions = { verbose: false, conditions: {} }) {
     const { verbose, conditions } = libOptions;
     return transactWrite({ docClient, transactions, options, verbose });
@@ -43,8 +43,8 @@ class Table {
     /**
      * Set partitionKey and sortKey
      */
-    const { KeySchema, GlobalSecondaryIndexes } = tableInfo;
-    const { partitionKey, sortKey } = this.getKeys(KeySchema);
+    const { KeySchema, GlobalSecondaryIndexes = [] } = tableInfo.Table;
+    const { partitionKey, sortKey } = this.retrieveKeys(KeySchema);
     this.partitionKey = partitionKey;
     this.sortKey = sortKey;
 
@@ -52,7 +52,7 @@ class Table {
      * Set indexes
      */
     for (const indexRecord of GlobalSecondaryIndexes) {
-      const { partitionKey, sortKey } = this.getKeys(indexRecord.KeySchema);
+      const { partitionKey, sortKey } = this.retrieveKeys(indexRecord.KeySchema);
       //   index.partitionKey = partitionKey;
       //   index.sortKey = sortKey;
       const index: IIndex = {
@@ -75,7 +75,7 @@ class Table {
     return key[this.partitionKey] !== undefined;
   }
 
-  public async get(key: any, options: any, libOptions = { verbose: false, forTrx: false }) {
+  public async get(key: any, options: any = {}, libOptions = { verbose: false, forTrx: false }) {
     if (!this.initialized) {
       await this.initTable();
     }
@@ -87,7 +87,7 @@ class Table {
     return getItem({ docClient, tableName: this.tableName, key, options, verbose, forTrx });
   }
 
-  public async create(item: any, options: any, libOptions = { verbose: false, forTrx: false }) {
+  public async create(item: any, options: any = {}, libOptions = { verbose: false, forTrx: false }) {
     if (!this.initialized) {
       await this.initTable();
     }
@@ -95,7 +95,7 @@ class Table {
     return createItem({ docClient, tableName: this.tableName, item, options, verbose, forTrx });
   }
 
-  public async delete(key: any, options: any, libOptions = { verbose: false, forTrx: false }) {
+  public async delete(key: any, options: any = {}, libOptions = { verbose: false, forTrx: false }) {
     if (!this.initialized) {
       await this.initTable();
     }
@@ -106,7 +106,7 @@ class Table {
     return deleteItem({ docClient, tableName: this.tableName, key, options, verbose, forTrx });
   }
 
-  public async update(key: any, newFields: any, options: any, libOptions = { verbose: false, forTrx: false }) {
+  public async update(key: any, newFields: any, options: any = {}, libOptions = { verbose: false, forTrx: false }) {
     if (!this.initialized) {
       await this.initTable();
     }
@@ -133,7 +133,7 @@ class Table {
       sortKeyOperator,
       sortKeyValue
     }: { indexName: string; partitionKeyValue: string; sortKeyOperator: string; sortKeyValue: string },
-    options: any,
+    options: any = {},
     libOptions = { verbose: false, pagination: true }
   ) {
     if (!this.initialized) {
@@ -167,7 +167,7 @@ class Table {
     });
   }
 
-  public async getAll(param: any = {}, options: any, libOptions = { verbose: false, pagination: true }) {
+  public async getAll(param: any = {}, options: any = {}, libOptions = { verbose: false, pagination: true }) {
     if (!this.initialized) {
       await this.initTable();
     }
@@ -183,7 +183,7 @@ class Table {
     });
   }
 
-  private getKeys(KeySchema: any) {
+  private retrieveKeys(KeySchema: any) {
     let partitionKey: string | undefined;
     let sortKey: string | undefined;
     for (const { AttributeName, KeyType } of KeySchema) {
@@ -197,5 +197,3 @@ class Table {
     return { partitionKey, sortKey };
   }
 }
-
-module.exports = Table;

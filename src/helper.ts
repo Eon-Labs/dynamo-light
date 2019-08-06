@@ -143,8 +143,8 @@ export function getExpressionAttributeValues(rawNewFields, sortKeyOperator: stri
   return ExpressionAttributeValues;
 }
 
-function getKeyConditionExpression({ partitionKey, sortKey, sortKeyOperator: rawSortKeyOperator }) {
-  const partitionKeyExpression = `#${partitionKey} = :${partitionKey}`;
+function getKeyConditionExpression({ hashKey, sortKey, sortKeyOperator: rawSortKeyOperator }) {
+  const hashKeyExpression = `#${hashKey} = :${hashKey}`;
   let sortKeyExpression;
   if (sortKey) {
     let sortKeyOperator = rawSortKeyOperator.toLowerCase();
@@ -187,18 +187,18 @@ function getKeyConditionExpression({ partitionKey, sortKey, sortKeyOperator: raw
       }
     }
   }
-  return partitionKeyExpression + (sortKeyExpression ? ` AND ${sortKeyExpression}` : "");
+  return hashKeyExpression + (sortKeyExpression ? ` AND ${sortKeyExpression}` : "");
 }
 
-export function buildKeyConditionExpressions({ partitionKey, partitionKeyValue, sortKey, sortKeyOperator, sortKeyValue }) {
+export function buildKeyConditionExpressions({ hashKey, hashKeyValue, sortKey, sortKeyOperator, sortKeyValue }) {
   const keyValueObj = {};
-  keyValueObj[partitionKey] = partitionKeyValue;
+  keyValueObj[hashKey] = hashKeyValue;
   if (sortKey) {
     keyValueObj[sortKey] = sortKeyValue;
   }
   const ExpressionAttributeNames = getExpressionAttributeNames(keyValueObj);
   const ExpressionAttributeValues = getExpressionAttributeValues(keyValueObj, sortKey ? sortKeyOperator : undefined);
-  const KeyConditionExpression = getKeyConditionExpression({ partitionKey, sortKey, sortKeyOperator });
+  const KeyConditionExpression = getKeyConditionExpression({ hashKey, sortKey, sortKeyOperator });
   return {
     KeyConditionExpression,
     ExpressionAttributeNames,
