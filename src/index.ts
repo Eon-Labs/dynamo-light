@@ -24,8 +24,8 @@ class Table {
 
   private tableName: string;
   private initialized: boolean;
-  private partitionKey: string;
-  private sortKey: string;
+  private partitionKey: string | undefined;
+  private sortKey: string | undefined;
   private indexMap: Map<string, IIndex>;
 
   constructor(name: string) {
@@ -36,10 +36,6 @@ class Table {
     this.indexMap = new Map();
   }
 
-  // public addKeysToObj(obj, KeySchema) {
-
-  // }
-
   public async initTable() {
     const tableInfo: any = await dynamodb.describeTable({ TableName: this.tableName }).promise();
     console.log("tableInfo", tableInfo);
@@ -48,25 +44,20 @@ class Table {
      * Set partitionKey and sortKey
      */
     const { KeySchema, GlobalSecondaryIndexes } = tableInfo;
-    for (const { AttributeName, KeyType } of KeySchema) {
-      if (KeyType === "HASH") {
-        this.partitionKey = AttributeName;
-      }
-      if (KeyType === "RANGE") {
-        this.sortKey = AttributeName;
-      }
-    }
+    this.addKeysToObj(KeySchema, this);
 
     /**
      * Set indexes
      */
-    for (const { IndexName, KeySchema } of GlobalSecondaryIndexes) {
-      const index = {};
-
-      // name: "UsernameIndex", hashKey: "username", sortKey: "tradeTime"
-      // this.indexMap.set(IndexName, index);
+    for (const indexRecord of GlobalSecondaryIndexes) {
+      const index: IIndex = {
+        name: "UsernameIndex",
+        partitionKey: undefined,
+        sortKey: undefined
+      };
+      this.addKeysToObj(indexRecord.KeySchema, index);
+      this.indexMap.set(indexRecord.IndexName, index);
     }
-    // process.exit();
   }
 
   /**
@@ -77,7 +68,7 @@ class Table {
     return key[this.partitionKey] !== undefined;
   }
 
-  public async get(key, options, libOptions = { verbose: false, forTrx: false }) {
+  public async get(key: string | , options, libOptions = { verbose: false, forTrx: false }) {
     if (!this.initialized) {
       await this.initTable();
     }
@@ -178,6 +169,17 @@ class Table {
       pagination,
       verbose
     });
+  }
+
+  private addKeysToObj(KeySchema: any, obj: any) {
+    for (const { AttributeName, KeyType } of KeySchema) {
+      if (KeyType === "HASH") {
+        obj.partitionKey = AttributeName;
+      }
+      if (KeyType === "RANGE") {
+        obj.sortKey = AttributeName;
+      }
+    }
   }
 }
 
