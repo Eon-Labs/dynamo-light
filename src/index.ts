@@ -75,10 +75,15 @@ export default class Table {
     return key[this.partitionKey] !== undefined;
   }
 
-  public async get(key: any, options: any = {}, libOptions = { verbose: false, forTrx: false }) {
+  public async get(key: object | string, options: any = {}, libOptions = { verbose: false, forTrx: false }) {
     if (!this.initialized) {
       await this.initTable();
     }
+
+    if (typeof key === "string") {
+      key = this.parsePartitionKey(key);
+    }
+
     if (!this.isValidKey(key)) {
       throw new Error(`key is invalid`);
     }
@@ -99,6 +104,11 @@ export default class Table {
     if (!this.initialized) {
       await this.initTable();
     }
+
+    if (typeof key === "string") {
+      key = this.parsePartitionKey(key);
+    }
+
     if (!this.isValidKey(key)) {
       throw new Error(`Key param contains invalid keyName`);
     }
@@ -109,6 +119,10 @@ export default class Table {
   public async update(key: any, newFields: any, options: any = {}, libOptions = { verbose: false, forTrx: false }) {
     if (!this.initialized) {
       await this.initTable();
+    }
+
+    if (typeof key === "string") {
+      key = this.parsePartitionKey(key);
     }
 
     if (!this.isValidKey(key)) {
@@ -195,5 +209,11 @@ export default class Table {
       }
     }
     return { partitionKey, sortKey };
+  }
+
+  private parsePartitionKey(partitionKeyValue: string): object {
+    return {
+      [this.partitionKey as string]: partitionKeyValue
+    };
   }
 }

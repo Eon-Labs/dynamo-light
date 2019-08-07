@@ -18,6 +18,14 @@ test("Grabs proper item given the right key", async () => {
   expect(result.Item.fileName).toBe(simpleKey.fileName);
 });
 
+test("Can grab item using partitionKey string", async () => {
+  const result1 = await tableWithPrimaryKey.get(simpleKey.fileName);
+  const result2 = await tableWithPrimaryKey.get(simpleKey);
+  expect(result1.Item).not.toBeNull();
+  expect(result2.Item).not.toBeNull();
+  expect(JSON.stringify(result1)).toBe(JSON.stringify(result2));
+});
+
 test("get non existing key should return {Item: null}", async () => {
   const result = await tableWithPrimaryKey.get(nonExistKey);
   expect(result.Item).toBeNull();

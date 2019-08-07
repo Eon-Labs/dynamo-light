@@ -2,9 +2,7 @@ const orderTable = new Table("order");
 // 只需要告诉table name, script会自动帮你parse primary/sortKey, indexes等等
 
 order = await orderTable.get("1cjdks32-dcj32ic-cmsjcce"); // 会用getItem获得对应的record
-order = await orderTable.get({
-  itemKey: { id: "1cjdks32-dcj32ic-cmsjcce", date: 1565034839932 }
-}); // 会用getItem获得对应的record
+order = await orderTable.get({ id: "1cjdks32-dcj32ic-cmsjcce", date: 1565034839932 }); // 会用getItem获得对应的record
 
 const createdOrder = await orderTable.put({
   id: "sadc12s-dfw313w-d23i3kjc",
