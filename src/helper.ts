@@ -2,7 +2,7 @@
  * Get new Image from DynamoDB Stream event, and parse it into a flat object
  * @param {*} record Record from DyanmoDB stream event
  */
-function parseNewImageFromRecord(record) {
+export function parseNewImageFromRecord(record) {
   if (!record || !record.dynamodb || !record.dynamodb.NewImage) {
     console.log(`Record is malformed, ${JSON.stringify(record)}`);
     throw new Error("Record is malformed");
@@ -13,8 +13,7 @@ function parseNewImageFromRecord(record) {
       console.log(`record.dynamodb.NewImage[param], ${record.dynamodb.NewImage[param]}`);
       throw new Error("Record is malformed");
     }
-    item[param] =
-      record.dynamodb.NewImage[param].S || parseFloat(record.dynamodb.NewImage[param].N);
+    item[param] = record.dynamodb.NewImage[param].S || parseFloat(record.dynamodb.NewImage[param].N);
   });
   return item;
 }
@@ -22,7 +21,7 @@ function parseNewImageFromRecord(record) {
 /**
  * Concat fetch results from query or scan operations - currently it concats Items only, TODO: concats other properties such as count
  */
-function concatBatchFetchResult(prevResult, fetchedData) {
+export function concatBatchFetchResult(prevResult, fetchedData) {
   if (!prevResult) {
     return fetchedData;
   }
@@ -37,7 +36,7 @@ function concatBatchFetchResult(prevResult, fetchedData) {
 /**
  * Get params for DynamoDB table update calls
  * */
-function getUpdateExpression(newFields) {
+export function getUpdateExpression(newFields) {
   let UpdateExpression = "";
   /**
    * Separate null and non-null fields,
@@ -109,7 +108,7 @@ function removePlusFromFieldNames(rawNewFields) {
   return newFields;
 }
 
-function getExpressionAttributeNames(rawNewFields) {
+export function getExpressionAttributeNames(rawNewFields) {
   const newFields = removePlusFromFieldNames(rawNewFields);
   const ExpressionAttributeNames = {};
   for (const fieldKey of Object.keys(newFields)) {
@@ -118,11 +117,10 @@ function getExpressionAttributeNames(rawNewFields) {
   return ExpressionAttributeNames;
 }
 
-function getExpressionAttributeValues(rawNewFields, sortKeyOperator = undefined) {
+export function getExpressionAttributeValues(rawNewFields, sortKeyOperator: string | undefined = undefined) {
   const newFields = removePlusFromFieldNames(rawNewFields);
   const ExpressionAttributeValues = {};
-  const operatorIsBetween =
-    typeof sortKeyOperator === "string" && sortKeyOperator.toLowerCase() === "between";
+  const operatorIsBetween = typeof sortKeyOperator === "string" && sortKeyOperator.toLowerCase() === "between";
   let foundSortKey = false;
 
   for (const fieldKey of Object.keys(newFields)) {
@@ -140,9 +138,7 @@ function getExpressionAttributeValues(rawNewFields, sortKeyOperator = undefined)
     }
   }
   if (operatorIsBetween && !foundSortKey) {
-    throw new Error(
-      "sortKeyValue must be an array with 2 elements when sortKeyOperator is 'between'"
-    );
+    throw new Error("sortKeyValue must be an array with 2 elements when sortKeyOperator is 'between'");
   }
   return ExpressionAttributeValues;
 }
@@ -194,23 +190,14 @@ function getKeyConditionExpression({ hashKey, sortKey, sortKeyOperator: rawSortK
   return hashKeyExpression + (sortKeyExpression ? ` AND ${sortKeyExpression}` : "");
 }
 
-function buildKeyConditionExpressions({
-  hashKey,
-  hashKeyValue,
-  sortKey,
-  sortKeyOperator,
-  sortKeyValue
-}) {
+export function buildKeyConditionExpressions({ hashKey, hashKeyValue, sortKey, sortKeyOperator, sortKeyValue }) {
   const keyValueObj = {};
   keyValueObj[hashKey] = hashKeyValue;
   if (sortKey) {
     keyValueObj[sortKey] = sortKeyValue;
   }
   const ExpressionAttributeNames = getExpressionAttributeNames(keyValueObj);
-  const ExpressionAttributeValues = getExpressionAttributeValues(
-    keyValueObj,
-    sortKey ? sortKeyOperator : undefined
-  );
+  const ExpressionAttributeValues = getExpressionAttributeValues(keyValueObj, sortKey ? sortKeyOperator : undefined);
   const KeyConditionExpression = getKeyConditionExpression({ hashKey, sortKey, sortKeyOperator });
   return {
     KeyConditionExpression,
@@ -234,9 +221,13 @@ function combineExpressions(exp1, exp2) {
  * Supports merging all dyanmodb expressions (filter, keyCondition, etc) and ExpressionAttributeNames, ExpressionAttributeValues,
  * For all the other params: opt2 will overwrite opt1
  */
-function mergeOptions(opt1, opt2) {
-  if (!opt1) return opt2;
-  if (!opt2) return opt1;
+export function mergeOptions(opt1, opt2) {
+  if (!opt1) {
+    return opt2;
+  }
+  if (!opt2) {
+    return opt1;
+  }
 
   /**
    * Combine ExpressionAttributeNames and ExpressionAttributeValues
@@ -259,10 +250,7 @@ function mergeOptions(opt1, opt2) {
     return keys ? keys.filter(key => key.slice(-10) === "Expression") : [];
   }
 
-  const expressionNameSet = new Set([
-    ...getAllExpressionNames(opt1),
-    ...getAllExpressionNames(opt2)
-  ]);
+  const expressionNameSet = new Set([...getAllExpressionNames(opt1), ...getAllExpressionNames(opt2)]);
   const expressionNames = Array.from(expressionNameSet);
 
   const combinedExpressions = {};
@@ -286,7 +274,7 @@ function mergeOptions(opt1, opt2) {
 /**
  * Prepare args to be ready for inserting into DynamoDB
  * */
-function removeInvalidArgs(args) {
+export function removeInvalidArgs(args) {
   const newArgs = [...args];
   for (const key of Object.keys(args)) {
     const isEmptyString = typeof args[key] === "string" && args[key].length === 0;
@@ -297,14 +285,3 @@ function removeInvalidArgs(args) {
   }
   return newArgs;
 }
-
-module.exports = {
-  parseNewImageFromRecord,
-  getUpdateExpression,
-  getExpressionAttributeNames,
-  getExpressionAttributeValues,
-  removeInvalidArgs,
-  buildKeyConditionExpressions,
-  mergeOptions,
-  concatBatchFetchResult
-};

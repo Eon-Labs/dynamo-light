@@ -1,4 +1,6 @@
-## A light weight library to access dynamodb tables
+## BETA: A light weight library to access dynamodb tables
+
+## Please note that this library is in non-stable beta stage, use on your own risk
 
 It provides the following common methods for each dynamodb table / indexes:
 
@@ -15,29 +17,15 @@ It provides the following common methods for each dynamodb table / indexes:
 npm install --save aqua-dynamo
 ```
 
-### Prerequisite
+### AWS Configurations
 
-- Have your [aws credentials configured](https://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/setting-credentials-node.html) properly.
-  For example, you can configure it in `~/.aws/credentials` file.
+Set AWS configurations in environment variables:
 
-- Have your [aws region](https://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/setting-region.html) configured using **environment variable**. Here is an example to set the environment variable at run time,
-
-  Mac:
-
-  - `AWS_REGION=us-east-1 node app.js`
-
-  Windows:
-
-  - Install [cross-env](https://www.npmjs.com/package/cross-env) npm package
-
-    `npm install --save-dev cross-env`
-
-  - Run
-
-    `cross-env AWS_REGION=us-east-1 node app.js`
-
-- This package is intended to be used in services such as AWS Lambda, which has aws-sdk installed by default in the environment. Therefore, aws-sdk is not listed as a dependency for this package to reduce package size. During development, make sure you have aws-sdk installed globally if you haven't done so already `npm install aws-sdk -g`. If you are working with an environment that doesn't have aws-sdk installed, make sure you install the aws-sdk pacakge in your project that uses `aqua-dynamo`.
-
+```javascript
+export AWS_ACCESS_KEY_ID="Your AWS Access Key ID"
+export AWS_SECRET_ACCESS_KEY="Your AWS Secret Access Key"
+export AWS_REGION="us-west-2"
+```
 
 ### Usage Example:
 
@@ -169,9 +157,7 @@ describe("Method that will grab queried items from  a given table", () => {
     expect(result).not.toBeNull();
     const attributes = Object.keys(result.Items[0]);
     expect(attributes).toEqual(expect.arrayContaining(["availableBalance", "symbol"]));
-    expect(attributes).not.toEqual(
-      expect.arrayContaining(["pendingTransfer", "totalBalance", "depositAddress"])
-    );
+    expect(attributes).not.toEqual(expect.arrayContaining(["pendingTransfer", "totalBalance", "depositAddress"]));
   });
   /**
    * FilterExpression still queries over the whole table and filters from there, not more efficient
@@ -190,10 +176,7 @@ describe("Method that will grab queried items from  a given table", () => {
    * Consistent Read does not work on secondary index
    */
   test("Use consistent read on items", async () => {
-    const result = await UserBalancesTable.query(
-      { hashKeyValue: "aleung_BTC" },
-      { ConsistentRead: true }
-    );
+    const result = await UserBalancesTable.query({ hashKeyValue: "aleung_BTC" }, { ConsistentRead: true });
     console.log(result);
   });
   test("Empty Items when a username you search for does not exist", async () => {

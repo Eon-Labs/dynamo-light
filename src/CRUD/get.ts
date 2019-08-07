@@ -1,7 +1,7 @@
 /**
  * Get Item from table
  */
-async function get({ docClient, tableName, key, options = {}, verbose = false, forTrx = false }) {
+export default async function get({ docClient, tableName, key, options = {}, verbose = false, forTrx = false }) {
   let params;
   try {
     /**
@@ -14,7 +14,7 @@ async function get({ docClient, tableName, key, options = {}, verbose = false, f
     /**
      * Construct database request
      */
-    const { AttributesToGet = null, ConsistentRead = false } = options;
+    const { AttributesToGet = null, ConsistentRead = false } = options as any;
     params = {
       TableName: tableName,
       Key: key,
@@ -42,14 +42,8 @@ async function get({ docClient, tableName, key, options = {}, verbose = false, f
 
     return data;
   } catch (err) {
-    console.error(
-      `Unable to get item from ${tableName}. Error JSON:`,
-      JSON.stringify(err),
-      err.stack
-    );
+    console.error(`Unable to get item from ${tableName}. Error JSON:`, JSON.stringify(err), err.stack);
     console.log("params", JSON.stringify(params));
     throw err;
   }
 }
-
-module.exports = get;
