@@ -4,11 +4,13 @@ const tableWithPrimaryKey = new Table("Clevo-Processed-Speech-Table");
 // const tableWithSortKey = new Transaction();
 console.error = jest.fn();
 
-beforeAll(async () => {
-  // await tableWithPrimaryKey.create({ key: "123" });
-});
+const simpleKey = { fileName: "20170623160058_966_13436475398_601_9" };
+const nonExistKey = { fileName: "not exist" };
+const simpleItem = { ...simpleKey, categorizedSpeechTopic: "Test data: hello world" };
 
-const simpleKey = { fileName: "20170623160058_966_13436475398_601" };
+beforeAll(async () => {
+  await tableWithPrimaryKey.put(simpleItem);
+});
 
 test("Grabs proper item given the right key", async () => {
   const result = await tableWithPrimaryKey.get(simpleKey);
@@ -17,8 +19,7 @@ test("Grabs proper item given the right key", async () => {
 });
 
 test("get non existing key should return {Item: null}", async () => {
-  const key = { key: "nonexist" };
-  const result = await tableWithPrimaryKey.get(key);
+  const result = await tableWithPrimaryKey.get(nonExistKey);
   expect(result.Item).toBeNull();
 });
 
@@ -62,8 +63,6 @@ test("Grab Key but only specific attribute", async () => {
 //       expect(e.message).toBe("key is invalid");
 //     }
 //   });
-//   afterAll(async () => {
-//     await tableWithPrimaryKey.delete({
-//       key: "123"
-//     });
-//   });
+afterAll(async () => {
+  await tableWithPrimaryKey.delete(simpleKey);
+});

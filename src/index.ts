@@ -1,9 +1,9 @@
 import * as AWS from "aws-sdk";
-import createItem from "./CRUD/create";
 import deleteItem from "./CRUD/delete";
 import getItem from "./CRUD/get";
-import getAllItems from "./CRUD/getAll";
+import createItem from "./CRUD/put";
 import queryItems from "./CRUD/query";
+import getAllItems from "./CRUD/scan";
 import transactWrite from "./CRUD/transactWrite";
 import updateItem from "./CRUD/update";
 import "./utils/env";
@@ -39,7 +39,6 @@ export default class Table {
 
   public async initTable() {
     const tableInfo: any = await dynamodb.describeTable({ TableName: this.tableName }).promise();
-    console.log("tableInfo", tableInfo);
     this.initialized = true;
     /**
      * Set partitionKey and sortKey
@@ -88,7 +87,7 @@ export default class Table {
     return getItem({ docClient, tableName: this.tableName, key, options, verbose, forTrx });
   }
 
-  public async create(item: any, options: any = {}, libOptions = { verbose: false, forTrx: false }) {
+  public async put(item: any, options: any = {}, libOptions = { verbose: false, forTrx: false }) {
     if (!this.initialized) {
       await this.initTable();
     }
@@ -168,7 +167,7 @@ export default class Table {
     });
   }
 
-  public async getAll(param: any = {}, options: any = {}, libOptions = { verbose: false, pagination: true }) {
+  public async scan(param: any = {}, options: any = {}, libOptions: any = { verbose: false, pagination: true }) {
     if (!this.initialized) {
       await this.initTable();
     }

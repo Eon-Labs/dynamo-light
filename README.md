@@ -1,4 +1,6 @@
-## A light weight library to access dynamodb tables
+## BETA: A light weight library to access dynamodb tables
+
+## Please note that this library is in non-stable beta stage, use on your own risk
 
 It provides the following common methods for each dynamodb table / indexes:
 
@@ -155,9 +157,7 @@ describe("Method that will grab queried items from  a given table", () => {
     expect(result).not.toBeNull();
     const attributes = Object.keys(result.Items[0]);
     expect(attributes).toEqual(expect.arrayContaining(["availableBalance", "symbol"]));
-    expect(attributes).not.toEqual(
-      expect.arrayContaining(["pendingTransfer", "totalBalance", "depositAddress"])
-    );
+    expect(attributes).not.toEqual(expect.arrayContaining(["pendingTransfer", "totalBalance", "depositAddress"]));
   });
   /**
    * FilterExpression still queries over the whole table and filters from there, not more efficient
@@ -176,10 +176,7 @@ describe("Method that will grab queried items from  a given table", () => {
    * Consistent Read does not work on secondary index
    */
   test("Use consistent read on items", async () => {
-    const result = await UserBalancesTable.query(
-      { hashKeyValue: "aleung_BTC" },
-      { ConsistentRead: true }
-    );
+    const result = await UserBalancesTable.query({ hashKeyValue: "aleung_BTC" }, { ConsistentRead: true });
     console.log(result);
   });
   test("Empty Items when a username you search for does not exist", async () => {
