@@ -6,6 +6,7 @@ import getAllItems from "./CRUD/getAll";
 import queryItems from "./CRUD/query";
 import transactWrite from "./CRUD/transactWrite";
 import updateItem from "./CRUD/update";
+import "./utils/env";
 
 const dynamodb = new AWS.DynamoDB();
 const docClient = new AWS.DynamoDB.DocumentClient();
