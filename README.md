@@ -1,20 +1,20 @@
 ## BETA: A light weight library to access dynamodb tables
 
-## Please note that this library is in non-stable beta stage, use on your own risk
+## Please note that this library is in beta version, use on your own risk
 
-It provides the following common methods for each dynamodb table / indexes:
+<!-- It provides the following common methods for each dynamodb table / indexes:
 
-- create
+- put
 - delete
 - get
-- getAll
+- scan
 - query
-- update
+- update -->
 
-### Installation
+<!-- ### Installation
 
 ```
-npm install --save aqua-dynamo
+npm install --save dynamo-light
 ```
 
 ### AWS Configurations
@@ -32,9 +32,9 @@ export AWS_REGION="us-west-2"
 Assume you have a simple Dynamodb table, whose table name is `Users`, and hashKey `userId`.
 
 ```javascript
-const TableModel = require("aqua-dynamo");
+const TableModel = require("dynamo-light");
 
-const userTable = new TableModel({ name: "Users", hashKey: "userId" });
+const userTable = new TableModel({ name: "Users"});
 
 await userTable.create({
   userId: "357",
@@ -95,7 +95,7 @@ if (result.LastEvaluatedKey) {
 Example of a complex table model with **global secondary indexes** and **customized methods**:
 
 ```javascript
-const TableModel = require("aqua-dynamo");
+const TableModel = require("dynamo-light");
 
 const UserBalanceHistoricalTable = {
   name: "UserBalanceHistorical",
@@ -239,9 +239,6 @@ class Address extends TableModel {
 
 ### Supported dynamodb operators
 
-<!-- | Operators | =   | <   | <=  | >   | >=  | begins_with (or beginsWith ) | between |
-| ---------- | --- | --- | --- | --- | --- | ---------------------------- | ------- | -->
-
 |          Operators           |
 | :--------------------------: |
 |              =               |
@@ -259,3 +256,4 @@ When querying with the options `Select: "COUNT"`, throws an error due to the Ite
 ```javascript
 const result = await UserBalancesTable.queryByUsername({ username: "aleung" }, { Select: "COUNT" });
 ```
+-->

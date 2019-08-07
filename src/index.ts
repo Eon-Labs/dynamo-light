@@ -17,9 +17,21 @@ interface IIndex {
   sortKey: string | undefined;
 }
 
+interface IBaseLibOptions {
+  verbose?: boolean;
+}
+
+interface ILibOptionsSingleItem extends IBaseLibOptions {
+  forTrx?: boolean;
+}
+
+interface ILibOptionsMultiItem extends IBaseLibOptions {
+  pagination?: boolean;
+}
+
 export default class Table {
-  public static transactWrite(transactions: any, options = {}, libOptions = { verbose: false, conditions: {} }) {
-    const { verbose, conditions } = libOptions;
+  public static transactWrite(transactions: any, options = {}, libOptions: IBaseLibOptions = { verbose: false }) {
+    const { verbose } = libOptions;
     return transactWrite({ docClient, transactions, options, verbose });
   }
 
@@ -52,13 +64,11 @@ export default class Table {
      * Set indexes
      */
     for (const indexRecord of GlobalSecondaryIndexes) {
-      const { partitionKey, sortKey } = this.retrieveKeys(indexRecord.KeySchema);
-      //   index.partitionKey = partitionKey;
-      //   index.sortKey = sortKey;
+      const { partitionKey: indexPartitionKey, sortKey: indexSortKey } = this.retrieveKeys(indexRecord.KeySchema);
       const index: IIndex = {
         name: "UsernameIndex",
-        partitionKey: partitionKey as string,
-        sortKey
+        partitionKey: indexPartitionKey as string,
+        sortKey: indexSortKey
       };
       this.indexMap.set(indexRecord.IndexName, index);
     }
@@ -75,7 +85,11 @@ export default class Table {
     return key[this.partitionKey] !== undefined;
   }
 
-  public async get(key: object | string, options: any = {}, libOptions = { verbose: false, forTrx: false }) {
+  public async get(
+    key: object | string,
+    options: any = {},
+    libOptions: ILibOptionsSingleItem = { verbose: false, forTrx: false }
+  ) {
     if (!this.initialized) {
       await this.initTable();
     }
@@ -92,7 +106,11 @@ export default class Table {
     return getItem({ docClient, tableName: this.tableName, key, options, verbose, forTrx });
   }
 
-  public async put(item: any, options: any = {}, libOptions = { verbose: false, forTrx: false }) {
+  public async put(
+    item: any,
+    options: any = {},
+    libOptions: ILibOptionsSingleItem = { verbose: false, forTrx: false }
+  ) {
     if (!this.initialized) {
       await this.initTable();
     }
@@ -100,7 +118,11 @@ export default class Table {
     return createItem({ docClient, tableName: this.tableName, item, options, verbose, forTrx });
   }
 
-  public async delete(key: any, options: any = {}, libOptions = { verbose: false, forTrx: false }) {
+  public async delete(
+    key: any,
+    options: any = {},
+    libOptions: ILibOptionsSingleItem = { verbose: false, forTrx: false }
+  ) {
     if (!this.initialized) {
       await this.initTable();
     }
@@ -116,7 +138,12 @@ export default class Table {
     return deleteItem({ docClient, tableName: this.tableName, key, options, verbose, forTrx });
   }
 
-  public async update(key: any, newFields: any, options: any = {}, libOptions = { verbose: false, forTrx: false }) {
+  public async update(
+    key: any,
+    newFields: any,
+    options: any = {},
+    libOptions: ILibOptionsSingleItem = { verbose: false, forTrx: false }
+  ) {
     if (!this.initialized) {
       await this.initTable();
     }
@@ -131,8 +158,9 @@ export default class Table {
     const { verbose, forTrx } = libOptions;
     return updateItem({
       docClient,
-      tableName: this.tableName,
       key,
+      tableName: this.tableName,
+
       newFields,
       options,
       verbose,
@@ -148,7 +176,7 @@ export default class Table {
       sortKeyValue
     }: { indexName: string; partitionKeyValue: string; sortKeyOperator: string; sortKeyValue: string },
     options: any = {},
-    libOptions = { verbose: false, pagination: true }
+    libOptions: ILibOptionsMultiItem = { verbose: false, pagination: true }
   ) {
     if (!this.initialized) {
       await this.initTable();
@@ -181,7 +209,11 @@ export default class Table {
     });
   }
 
-  public async scan(param: any = {}, options: any = {}, libOptions: any = { verbose: false, pagination: true }) {
+  public async scan(
+    param: any = {},
+    options: any = {},
+    libOptions: ILibOptionsMultiItem = { verbose: false, pagination: true }
+  ) {
     if (!this.initialized) {
       await this.initTable();
     }

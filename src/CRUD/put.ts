@@ -15,7 +15,7 @@ export default async function create({ docClient, tableName, item, options = {},
       },
       ...options
     };
-    verbose && console.log("params", params);
+    if (verbose) { console.log("params", params); }
 
     /**
      * Return params for this requirement, used for transact method
@@ -27,7 +27,7 @@ export default async function create({ docClient, tableName, item, options = {},
     }
 
     await docClient.put(params).promise();
-    verbose && console.log(`Successfully inserted item into table ${tableName}`);
+    if (verbose) { console.log(`Successfully inserted item into table ${tableName}`); }
     return params;
   } catch (err) {
     console.error(`Unable to insert item into ${tableName}. Error JSON:`, JSON.stringify(err), err.stack);

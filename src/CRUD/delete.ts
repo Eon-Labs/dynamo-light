@@ -14,7 +14,9 @@ export default async function deleteItem({ docClient, tableName, key, options = 
       ReturnValues,
       ...options
     };
-    verbose && console.log("params", params);
+    if (verbose) {
+      console.log("params", params);
+    }
 
     /**
      * Return params for this requirement, used for transact method
@@ -29,7 +31,7 @@ export default async function deleteItem({ docClient, tableName, key, options = 
     if (!data.Attributes) {
       throw new Error(`Key ${JSON.stringify(key)} already does not exist, try again.`);
     } else {
-      verbose && console.log(`Successfully deleted item from table ${tableName}`, data);
+      if (verbose) { console.log(`Successfully deleted item from table ${tableName}`, data); }
       return data;
     }
   } catch (error) {

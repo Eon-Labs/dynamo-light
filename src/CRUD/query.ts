@@ -1,4 +1,4 @@
-const { buildKeyConditionExpressions, mergeOptions, concatBatchFetchResult } = require("../helper");
+import { buildKeyConditionExpressions, concatBatchFetchResult, mergeOptions } from "../utils/helper";
 
 export default async function query({
   docClient,
@@ -48,7 +48,9 @@ export default async function query({
       },
       options
     );
-    verbose && console.log("params", params);
+    if (verbose) {
+      console.log("params", params);
+    }
     /**
      * Make the query
      */
@@ -66,7 +68,9 @@ export default async function query({
       const noItemsToFetch = !fetchedData || !fetchedData.Items || fetchedData.Items.length === 0;
       shouldKeepFetching = !pagination && params.Limit > 0 && LastEvaluatedKey !== "undefined" && !noItemsToFetch;
     }
-    verbose && console.log(`Successfully queried ${result.Count} items from table ${tableName}`);
+    if (verbose) {
+      console.log(`Successfully queried ${result.Count} items from table ${tableName}`);
+    }
     return result;
   } catch (error) {
     console.error(`Unable to query items from ${tableName}. Error JSON:`, JSON.stringify(error), error.stack);

@@ -22,7 +22,9 @@ export default async function get({ docClient, tableName, key, options = {}, ver
       ConsistentRead,
       ...options
     };
-    verbose && console.log("params", params);
+    if (verbose) {
+      console.log("params", params);
+    }
 
     /**
      * Return params for this requirement, used for transact method
@@ -34,7 +36,9 @@ export default async function get({ docClient, tableName, key, options = {}, ver
     }
 
     const data = await docClient.get(params).promise();
-    verbose && console.log(`Successfully got item from table ${tableName}`, data);
+    if (verbose) {
+      console.log(`Successfully got item from table ${tableName}`, data);
+    }
     if (!data.Item) {
       data.Item = null;
       // throw new Error(`No item found with key = ${JSON.stringify(key)}`);

@@ -1,8 +1,8 @@
-const api = require("../helper");
+import * as api from "../utils/helper";
 
 /**
  * Update item in table
- * */
+ */
 export default async function update({
   docClient,
   tableName,
@@ -48,7 +48,9 @@ export default async function update({
       },
       options
     );
-    verbose && console.log("params", params);
+    if (verbose) {
+      console.log("params", params);
+    }
 
     /**
      * Return params for this requirement, used for transact method
@@ -60,7 +62,9 @@ export default async function update({
     }
 
     const data = await docClient.update(params).promise();
-    verbose && console.log(`Successfully updated item from table ${tableName}`, data);
+    if (verbose) {
+      console.log(`Successfully updated item from table ${tableName}`, data);
+    }
     return data;
   } catch (err) {
     console.error(

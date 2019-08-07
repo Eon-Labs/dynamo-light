@@ -1,8 +1,8 @@
-import { concatBatchFetchResult } from "../helper";
+import { concatBatchFetchResult } from "../utils/helper";
 
 /**
  * Get all items from table
- * */
+ */
 export default async function getAll({
   docClient,
   tableName,
@@ -18,7 +18,9 @@ export default async function getAll({
       ...(indexName && { IndexName: indexName }),
       ...options
     };
-    verbose && console.log("params", params);
+    if (verbose) {
+      console.log("params", params);
+    }
     let result;
     let shouldKeepFetching;
     while (!result || shouldKeepFetching) {
@@ -32,7 +34,9 @@ export default async function getAll({
       }
       shouldKeepFetching = !pagination && params.Limit > 0 && LastEvaluatedKey !== "undefined";
     }
-    verbose && console.log(`Successfully scanned ${result.Count} items from table ${tableName}`);
+    if (verbose) {
+      console.log(`Successfully scanned ${result.Count} items from table ${tableName}`);
+    }
     return result;
   } catch (error) {
     console.error(`Unable to get all items from ${tableName}. Error JSON:`, JSON.stringify(error), error.stack);

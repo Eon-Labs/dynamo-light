@@ -35,7 +35,8 @@ export function concatBatchFetchResult(prevResult, fetchedData) {
 
 /**
  * Get params for DynamoDB table update calls
- * */
+ * @param newFields
+ */
 export function getUpdateExpression(newFields) {
   let UpdateExpression = "";
   /**
@@ -117,7 +118,7 @@ export function getExpressionAttributeNames(rawNewFields) {
   return ExpressionAttributeNames;
 }
 
-export function getExpressionAttributeValues(rawNewFields, sortKeyOperator: string | undefined = undefined) {
+export function getExpressionAttributeValues(rawNewFields, sortKeyOperator?: string) {
   const newFields = removePlusFromFieldNames(rawNewFields);
   const ExpressionAttributeValues = {};
   const operatorIsBetween = typeof sortKeyOperator === "string" && sortKeyOperator.toLowerCase() === "between";
@@ -143,8 +144,8 @@ export function getExpressionAttributeValues(rawNewFields, sortKeyOperator: stri
   return ExpressionAttributeValues;
 }
 
-function getKeyConditionExpression({ hashKey, sortKey, sortKeyOperator: rawSortKeyOperator }) {
-  const hashKeyExpression = `#${hashKey} = :${hashKey}`;
+function getKeyConditionExpression({ partitionKey, sortKey, sortKeyOperator: rawSortKeyOperator }) {
+  const partitionKeyExpression = `#${partitionKey} = :${partitionKey}`;
   let sortKeyExpression;
   if (sortKey) {
     let sortKeyOperator = rawSortKeyOperator.toLowerCase();
@@ -187,18 +188,24 @@ function getKeyConditionExpression({ hashKey, sortKey, sortKeyOperator: rawSortK
       }
     }
   }
-  return hashKeyExpression + (sortKeyExpression ? ` AND ${sortKeyExpression}` : "");
+  return partitionKeyExpression + (sortKeyExpression ? ` AND ${sortKeyExpression}` : "");
 }
 
-export function buildKeyConditionExpressions({ hashKey, hashKeyValue, sortKey, sortKeyOperator, sortKeyValue }) {
+export function buildKeyConditionExpressions({
+  partitionKey,
+  partitionKeyValue,
+  sortKey,
+  sortKeyOperator,
+  sortKeyValue
+}) {
   const keyValueObj = {};
-  keyValueObj[hashKey] = hashKeyValue;
+  keyValueObj[partitionKey] = partitionKeyValue;
   if (sortKey) {
     keyValueObj[sortKey] = sortKeyValue;
   }
   const ExpressionAttributeNames = getExpressionAttributeNames(keyValueObj);
   const ExpressionAttributeValues = getExpressionAttributeValues(keyValueObj, sortKey ? sortKeyOperator : undefined);
-  const KeyConditionExpression = getKeyConditionExpression({ hashKey, sortKey, sortKeyOperator });
+  const KeyConditionExpression = getKeyConditionExpression({ partitionKey, sortKey, sortKeyOperator });
   return {
     KeyConditionExpression,
     ExpressionAttributeNames,
@@ -273,7 +280,8 @@ export function mergeOptions(opt1, opt2) {
 
 /**
  * Prepare args to be ready for inserting into DynamoDB
- * */
+ * @param args
+ */
 export function removeInvalidArgs(args) {
   const newArgs = [...args];
   for (const key of Object.keys(args)) {
