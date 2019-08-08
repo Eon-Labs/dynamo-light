@@ -1,15 +1,26 @@
 import Table from "../../index";
 
-const tableWithPrimaryKey = new Table("Clevo-Processed-Speech-Table");
-// const tableWithSortKey = new Transaction();
+const tableWithSmallData = new Table("Clevo-Processed-Speech-Table");
+const tableWithMediumData = new Table("Clevo-Raw-Speech-Table");
 console.error = jest.fn();
 
 beforeAll(async () => {
-  // await tableWithPrimaryKey.create({ key: "123" });
+  //
 });
 
-test("Scan all records", async () => {
-  const result = await tableWithPrimaryKey.scan({}, {}, { pagination: false });
-  expect(result.Item).not.toBeNull();
+test("Scan records", async () => {
+  const result = await tableWithSmallData.scan();
+  expect(result.Items).not.toBeNull();
   expect(result.Items.length > 0).toBe(true);
+});
+
+test("Multiple scan of records", async () => {
+  // const result1 = await tableWithMediumData.scan();
+  const result1 = await tableWithMediumData.scan({}, {}, { pagination: true });
+  const result2 = await tableWithMediumData.scan({}, {}, { pagination: false });
+  console.log("result1.Items.length", result1.Items.length);
+  console.log("result2.Items.length", result2.Items.length);
+  expect(result1.Items.length > 0).toBe(true);
+  expect(result2.Items.length > 0).toBe(true);
+  expect(result2.Items.length > result1.Items.length).toBe(true);
 });
