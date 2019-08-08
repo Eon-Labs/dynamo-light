@@ -35,11 +35,11 @@ export default class Table {
     return transactWrite({ docClient, transactions, options, verbose });
   }
 
-  private tableName: string;
+  public tableName: string;
+  public partitionKey: string | undefined;
+  public sortKey: string | undefined;
+  public indexMap: Map<string, IIndex>;
   private initialized: boolean;
-  private partitionKey: string | undefined;
-  private sortKey: string | undefined;
-  private indexMap: Map<string, IIndex>;
 
   constructor(name: string) {
     this.tableName = name;
