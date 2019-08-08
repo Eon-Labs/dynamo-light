@@ -14,7 +14,9 @@ export default async function transactWrite({ docClient, transactions, options, 
     };
 
     const data = await docClient.transactWrite(params).promise();
-    if (verbose) { console.log(`Successfully performed transactionWrite`, data); }
+    if (verbose) {
+      console.log(`Successfully performed transactionWrite`, data);
+    }
     return data;
   } catch (err) {
     console.error(

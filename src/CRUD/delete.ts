@@ -31,7 +31,9 @@ export default async function deleteItem({ docClient, tableName, key, options = 
     if (!data.Attributes) {
       throw new Error(`Key ${JSON.stringify(key)} already does not exist, try again.`);
     } else {
-      if (verbose) { console.log(`Successfully deleted item from table ${tableName}`, data); }
+      if (verbose) {
+        console.log(`Successfully deleted item from table ${tableName}`, data);
+      }
       return data;
     }
   } catch (error) {

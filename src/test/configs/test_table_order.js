@@ -65,10 +65,7 @@ class Order extends TableModel {
     );
   }
 
-  queryByActiveTradeStatusWithTimeRange(
-    { activeTradeStatus, timeFrom, timeTo, parentOnly },
-    options = null
-  ) {
+  queryByActiveTradeStatusWithTimeRange({ activeTradeStatus, timeFrom, timeTo, parentOnly }, options = null) {
     const queryOptions = updateOptionsBasedOnConditions({ parentOnly }, options);
     return super.query(
       {
