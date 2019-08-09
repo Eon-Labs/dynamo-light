@@ -1,4 +1,4 @@
-import Table from "../../index";
+import Table from "../../src/index";
 
 const tableWithSmallData = new Table("Clevo-Processed-Speech-Table");
 const tableWithMediumData = new Table("Clevo-Raw-Speech-Table");

@@ -1,4 +1,4 @@
-import Table from "../../index";
+import Table from "../../src/index";
 
 const tableWithPrimaryKey = new Table("Clevo-Processed-Speech-Table");
 // const tableWithSortKey = new Transaction();
