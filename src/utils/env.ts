@@ -1,5 +1,10 @@
+import { config } from "dotenv";
+import { existsSync } from "fs";
 import { resolve } from "path";
 
-import { config } from "dotenv";
+const envProjectPath = "./.env";
+const envRelativePath = "../../.env";
 
-config({ path: resolve(__dirname, "../../.env") });
+if (existsSync(envProjectPath)) {
+  config({ path: resolve(__dirname, envRelativePath) });
+}

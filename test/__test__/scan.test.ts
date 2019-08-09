@@ -21,4 +21,4 @@ test("Multiple scan of records", async () => {
   expect(result1.Items.length > 0).toBe(true);
   expect(result2.Items.length > 0).toBe(true);
   expect(result2.Items.length > result1.Items.length).toBe(true);
-});
+}, 15000);

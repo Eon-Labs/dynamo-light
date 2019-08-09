@@ -1,3 +1,5 @@
+import "./utils/env";
+
 import * as AWS from "aws-sdk";
 import deleteItem from "./CRUD/delete";
 import getItem from "./CRUD/get";
@@ -6,7 +8,6 @@ import queryItems from "./CRUD/query";
 import getAllItems from "./CRUD/scan";
 import transactWrite from "./CRUD/transactWrite";
 import updateItem from "./CRUD/update";
-import "./utils/env";
 
 let dynamodb = new AWS.DynamoDB();
 let docClient = new AWS.DynamoDB.DocumentClient();
