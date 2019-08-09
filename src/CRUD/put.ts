@@ -1,18 +1,29 @@
 /**
  * Create Item in table, 'createdAt' and 'updatedAt' timeStamps will be added in each item
  */
-export default async function create({ docClient, tableName, item, options = {}, verbose = false, forTrx = false }) {
+export default async function create({
+  docClient,
+  tableName,
+  item: rawItem,
+  options = {},
+  verbose = false,
+  forTrx = false,
+  autoTimeStamp = false
+}) {
   let params;
   try {
-    const timeStamp = Date.now();
+    const item = {
+      ...rawItem
+    };
+    if (autoTimeStamp) {
+      const timeStamp = Date.now();
+      item.createdAt = timeStamp;
+      item.updatedAt = timeStamp;
+    }
 
     params = {
       TableName: tableName,
-      Item: {
-        ...item,
-        createdAt: timeStamp,
-        updatedAt: timeStamp
-      },
+      Item: item,
       ...options
     };
     if (verbose) {

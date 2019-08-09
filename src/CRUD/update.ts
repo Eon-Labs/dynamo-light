@@ -10,7 +10,8 @@ export default async function update({
   newFields: rawNewFields,
   options = {},
   verbose = false,
-  forTrx = false
+  forTrx = false,
+  autoTimeStamp = false
 }) {
   let params;
   try {
@@ -26,7 +27,10 @@ export default async function update({
     }
 
     // Get update parameters
-    const newFields = { ...rawNewFields, updatedAt: Date.now() };
+    const newFields = { ...rawNewFields };
+    if (autoTimeStamp) {
+      newFields.updatedAt = Date.now();
+    }
     const UpdateExpression = api.getUpdateExpression(newFields);
     const attributesUsedInExpression = createIfNotExist ? newFields : { ...newFields, ...key };
 
