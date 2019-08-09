@@ -1,0 +1,217 @@
+service: local-dynamo
+plugins:
+  - serverless-dynamodb-local
+
+custom:
+  dynamodb:
+    stages:
+      - test
+      - dev
+
+provider:
+  name: aws
+  runtime: nodejs10.x
+  stage: dev
+
+resources:
+  Resources:
+    APIKeysTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        TableName: APIKeys
+        AttributeDefinitions:
+          - AttributeName: key
+            AttributeType: S
+          - AttributeName: userName
+            AttributeType: S
+        KeySchema:
+          - AttributeName: key
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: userName-index
+            KeySchema:
+              - AttributeName: userName
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+        BillingMode: PAY_PER_REQUEST
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
+    DepositTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        TableName: Deposit
+        AttributeDefinitions:
+          - AttributeName: address
+            AttributeType: S
+          - AttributeName: status
+            AttributeType: S
+          - AttributeName: symbolTime
+            AttributeType: S
+          - AttributeName: username
+            AttributeType: S
+          - AttributeName: currencyTag
+            AttributeType: S
+        KeySchema:
+          - AttributeName: address
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: status-symbolTime-index
+            KeySchema:
+              - AttributeName: status
+                KeyType: HASH
+              - AttributeName: symbolTime
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+          - IndexName: usernameAutopilotIndex
+            KeySchema:
+              - AttributeName: username
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+          - IndexName: addressTagIndex
+            KeySchema:
+              - AttributeName: address
+                KeyType: HASH
+              - AttributeName: currencyTag
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
+        BillingMode: PAY_PER_REQUEST
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
+    ExecutionTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        TableName: Execution
+        AttributeDefinitions:
+          - AttributeName: orderId
+            AttributeType: S
+          - AttributeName: username
+            AttributeType: S
+          - AttributeName: activeTradeStatus
+            AttributeType: S
+          - AttributeName: exchangePair
+            AttributeType: S
+          - AttributeName: tradeTime
+            AttributeType: N
+          - AttributeName: exchangeOrderId
+            AttributeType: S
+          - AttributeName: exchangeClientOrderId
+            AttributeType: S
+          - AttributeName: orderType
+            AttributeType: S
+          - AttributeName: orderIdParent
+            AttributeType: S
+          - AttributeName: updatedAt
+            AttributeType: N
+          - AttributeName: tradeStatus
+            AttributeType: S
+        KeySchema:
+          - AttributeName: orderId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: UsernameIndex
+            KeySchema:
+              - AttributeName: username
+                KeyType: HASH
+              - AttributeName: tradeTime
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+          - IndexName: activeTradeStatusIndex
+            KeySchema:
+              - AttributeName: activeTradeStatus
+                KeyType: HASH
+              - AttributeName: tradeTime
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+          - IndexName: exchangePairIndex
+            KeySchema:
+              - AttributeName: exchangePair
+                KeyType: HASH
+              - AttributeName: tradeTime
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+          - IndexName: exchangeOrderIdIndex
+            KeySchema:
+              - AttributeName: exchangeOrderId
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+          - IndexName: exchangeClientOrderIdIndex
+            KeySchema:
+              - AttributeName: exchangeClientOrderId
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+          - IndexName: orderTypeIndex
+            KeySchema:
+              - AttributeName: orderType
+                KeyType: HASH
+              - AttributeName: tradeTime
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+          - IndexName: orderIdParent-updatedAt-index
+            KeySchema:
+              - AttributeName: orderIdParent
+                KeyType: HASH
+              - AttributeName: updatedAt
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+          - IndexName: usernameTradeStatusIndex
+            KeySchema:
+              - AttributeName: username
+                KeyType: HASH
+              - AttributeName: tradeStatus
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
+        BillingMode: PAY_PER_REQUEST
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
+    ExecutionHistoricalTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        TableName: ExecutionHistorical
+        AttributeDefinitions:
+          - AttributeName: orderId
+            AttributeType: S
+          - AttributeName: itemDateTime
+            AttributeType: N
+        KeySchema:
+          - AttributeName: orderId
+            KeyType: HASH
+          - AttributeName: itemDateTime
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
+    TransactionTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        TableName: Transaction
+        AttributeDefinitions:
+          - AttributeName: username
+            AttributeType: S
+          - AttributeName: itemDateTime
+            AttributeType: N
+        KeySchema:
+          - AttributeName: username
+            KeyType: HASH
+          - AttributeName: itemDateTime
+            KeyType: RANGE
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
+        BillingMode: PAY_PER_REQUEST
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true

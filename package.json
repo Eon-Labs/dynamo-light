@@ -13,7 +13,8 @@
     "prepublishOnly": "npm test && npm run lint",
     "preversion": "npm run lint",
     "version": "npm run format && git add -A src",
-    "postversion": "git push && git push --tags"
+    "postversion": "git push && git push --tags",
+    "createTestEnv": "cd test/local-dynamo && sls dynamodb start --migrate; npm run test"
   },
   "dependencies": {
     "aws-sdk": "^2.504.0"
@@ -25,6 +26,7 @@
     "dotenv": "^8.0.0",
     "jest": "^24.8.0",
     "prettier": "^1.18.2",
+    "serverless-dynamodb-local": "^0.2.38",
     "ts-jest": "^24.0.2",
     "tslint": "^5.18.0",
     "tslint-config-prettier": "^1.18.0",

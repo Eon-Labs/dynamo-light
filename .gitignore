@@ -1,4 +1,10 @@
+# package directories
+jspm_packages
 node_modules
 out
 lib
 .env
+
+# Serverless directories
+.serverless
+test/local-dynamo/.dynamodb

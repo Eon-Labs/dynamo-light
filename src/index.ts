@@ -8,8 +8,8 @@ import transactWrite from "./CRUD/transactWrite";
 import updateItem from "./CRUD/update";
 import "./utils/env";
 
-const dynamodb = new AWS.DynamoDB();
-const docClient = new AWS.DynamoDB.DocumentClient();
+let dynamodb = new AWS.DynamoDB();
+let docClient = new AWS.DynamoDB.DocumentClient();
 
 interface IIndex {
   name: string;
@@ -33,6 +33,11 @@ export default class Table {
   public static transactWrite(transactions: any, options = {}, libOptions: IBaseLibOptions = { verbose: false }) {
     const { verbose } = libOptions;
     return transactWrite({ docClient, transactions, options, verbose });
+  }
+
+  public static replaceDynamoClient(newDynamodb, newClient) {
+    dynamodb = newDynamodb;
+    docClient = newClient;
   }
 
   public tableName: string;
@@ -82,7 +87,20 @@ export default class Table {
     if (!this.partitionKey) {
       return false;
     }
-    return key[this.partitionKey] !== undefined;
+    /**
+     * Check if input key contains non-key fields
+     */
+    let noExtraField = true;
+    for (const objKey of Object.keys(key)) {
+      if (this.partitionKey !== objKey && this.sortKey !== objKey) {
+        noExtraField = false;
+      }
+    }
+    /**
+     * Check if input key contains partitionKey
+     */
+    const containsPartitionKey = key[this.partitionKey] !== undefined;
+    return noExtraField && containsPartitionKey;
   }
 
   public async get(
@@ -99,7 +117,7 @@ export default class Table {
     }
 
     if (!this.isValidKey(key)) {
-      throw new Error(`key is invalid`);
+      throw new Error(`Invalid Key: ${JSON.stringify(key)}`);
     }
 
     const { verbose, forTrx } = libOptions;
@@ -132,7 +150,7 @@ export default class Table {
     }
 
     if (!this.isValidKey(key)) {
-      throw new Error(`Key param contains invalid keyName`);
+      throw new Error(`Invalid Key: ${JSON.stringify(key)}`);
     }
     const { verbose, forTrx } = libOptions;
     return deleteItem({ docClient, tableName: this.tableName, key, options, verbose, forTrx });
@@ -153,7 +171,7 @@ export default class Table {
     }
 
     if (!this.isValidKey(key)) {
-      throw new Error(`Key param contains invalid keyName`);
+      throw new Error(`Invalid Key: ${JSON.stringify(key)}`);
     }
     const { verbose, forTrx } = libOptions;
     return updateItem({
