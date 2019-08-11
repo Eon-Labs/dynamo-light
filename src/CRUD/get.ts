@@ -7,19 +7,15 @@ export default async function get({ docClient, tableName, key, options = {}, ver
     /**
      * Param verification
      */
-
     if (!key) {
       throw new Error("key is undefined!");
     }
     /**
      * Construct database request
      */
-    const { AttributesToGet = null, ConsistentRead = false } = options as any;
     params = {
       TableName: tableName,
       Key: key,
-      AttributesToGet,
-      ConsistentRead,
       ...options
     };
     if (verbose) {

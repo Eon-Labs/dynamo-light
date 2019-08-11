@@ -1,76 +1,75 @@
+import * as AWS from "aws-sdk";
 import Table from "../../src/index";
 
-const tableWithPrimaryKey = new Table("Clevo-Processed-Speech-Table");
-// const tableWithSortKey = new Transaction();
+const tableWithPrimaryKey = new Table("Clevo-Raw-Speech-Table");
+const tableWithSortKey = new Table("Clevo-Categorized-Sentence-Table");
 console.error = jest.fn();
 
-const simpleKey = { fileName: "20170623160058_966_13436475398_601_9" };
+const simpleKeyStr = "351244_208_153939";
+const simpleKey = { fileName: simpleKeyStr };
 const nonExistKey = { fileName: "not exist" };
-const simpleItem = { ...simpleKey, categorizedSpeechTopic: "Test data: hello world" };
+const composedKey = { categoryName: "查询扣款", fileNameBeginTime: "20170623160058_966_13436475398_601.wav-16940" };
 
 beforeAll(async () => {
-  await tableWithPrimaryKey.put(simpleItem);
+  const localDynamodb = new AWS.DynamoDB({
+    region: "us-west-2",
+    endpoint: "http://localhost:8000"
+  });
+  const localClient = new AWS.DynamoDB.DocumentClient({
+    region: "us-west-2",
+    endpoint: "http://localhost:8000"
+  });
+
+  Table.replaceDynamoClient(localDynamodb, localClient);
 });
 
-test("Grabs proper item given the right key", async () => {
+test("Get item with shorthand partitionKey string", async () => {
+  const result = await tableWithPrimaryKey.get(simpleKeyStr);
+  expect(result.Item).not.toBeNull();
+  expect(result.Item.fileName).toBe(simpleKey.fileName);
+});
+
+test("get item with regular partitionKey", async () => {
   const result = await tableWithPrimaryKey.get(simpleKey);
   expect(result.Item).not.toBeNull();
   expect(result.Item.fileName).toBe(simpleKey.fileName);
 });
 
-test("Can grab item using partitionKey string", async () => {
-  const result1 = await tableWithPrimaryKey.get(simpleKey.fileName);
-  const result2 = await tableWithPrimaryKey.get(simpleKey);
-  expect(result1.Item).not.toBeNull();
-  expect(result2.Item).not.toBeNull();
-  expect(JSON.stringify(result1)).toBe(JSON.stringify(result2));
+test("get item with partitionKey and sortKey", async () => {
+  const result = await tableWithSortKey.get(composedKey);
+  expect(result.Item).not.toBeNull();
+  expect(result.Item.categoryName).toBe(composedKey.categoryName);
 });
 
-test("get non existing key should return {Item: null}", async () => {
+test("get item with non-existing key", async () => {
   const result = await tableWithPrimaryKey.get(nonExistKey);
   expect(result.Item).toBeNull();
 });
 
-test("Grab key with ConsistentRead set to true", async () => {
-  await tableWithPrimaryKey.update(simpleKey, { username: "wooj" });
+test("get item with options - ConsistentRead", async () => {
   const result = await tableWithPrimaryKey.get(simpleKey, { ConsistentRead: true });
   expect(result.Item).not.toBeNull();
 });
 
-test("Grab Key but only specific attribute", async () => {
-  const key = simpleKey;
-  await tableWithPrimaryKey.update(key, { username: "wooj" });
-  const result = await tableWithPrimaryKey.get(key, { ProjectionExpression: "username" });
-  expect(result.Item.key).toBeUndefined();
-  expect(result.Item.username).toBe("wooj");
+test("get item with options - ProjectionExpression", async () => {
+  const [entireItem, partialItem] = await Promise.all([
+    tableWithSortKey.get(composedKey),
+    tableWithSortKey.get(composedKey, { ProjectionExpression: "bg, operatorId" })
+  ]);
+  expect(Object.keys(entireItem.Item).length).toBeGreaterThan(Object.keys(partialItem.Item).length);
+  expect(entireItem.Item.ed).toBeDefined();
+  expect(partialItem.Item.ed).toBeUndefined();
+  expect(partialItem.Item.bg).toBeDefined();
+  expect(partialItem.Item.operatorId).toBeDefined();
+  expect(partialItem.Item).toBeDefined();
 });
-//   test("Grab Key with two options", async () => {
-//     const key = { key: "123" };
-//     const options = { ReturnConsumedCapacity: "INDEXES", ProjectionExpression: "username" };
-//     const result = await tableWithPrimaryKey.get(key, options);
-//     expect(result.ConsumedCapacity).toBeTruthy();
-//     expect(result.ConsumedCapacity.CapacityUnits).toBeTruthy();
-//     expect(result.Item.key).toBeUndefined();
-//     expect(result.Item.username).toBe("wooj");
-//   });
 
-//   // test("Grab item with both primary and sort key", async () => {
-//   //   const key = { username: "wooj", itemDateTime: 20190201 };
-//   //   const result = await tableWithSortKey.get(key);
-//   //   expect(result).not.toBeNull();
-//   //   expect(result.Item.username).toBe("wooj");
-//   //   expect(result.Item.isCompleted).toEqual(true);
-//   // });
-
-//   test(`If no key is provided returns "key is undefined!" message.`, async () => {
-//     const key = "";
-//     expect.assertions(1);
-//     try {
-//       await tableWithPrimaryKey.get(key);
-//     } catch (e) {
-//       expect(e.message).toBe("key is invalid");
-//     }
-//   });
-afterAll(async () => {
-  await tableWithPrimaryKey.delete(simpleKey);
+test(`get item with invalid key should return error`, async () => {
+  const key = { abc: 123 };
+  expect.assertions(1);
+  try {
+    await tableWithPrimaryKey.get(key);
+  } catch (e) {
+    expect(e.message).toBe(`Invalid Key: ${JSON.stringify(key)}`);
+  }
 });

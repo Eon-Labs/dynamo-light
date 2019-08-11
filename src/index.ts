@@ -12,6 +12,21 @@ import updateItem from "./CRUD/update";
 let dynamodb = new AWS.DynamoDB();
 let docClient = new AWS.DynamoDB.DocumentClient();
 
+type TableId = string;
+type TableName = string;
+type TableNameList = TableName[];
+type TableStatus = "CREATING" | "UPDATING" | "DELETING" | "ACTIVE" | string;
+
+// let test: AWS.DynamoDB.DocumentClient.GetItemInput;
+
+interface IGetInput {
+  AttributesToGet?: any;
+  ConsistentRead?: any;
+  ReturnConsumedCapacity?: any;
+  ProjectionExpression?: any;
+  ExpressionAttributeNames?: any;
+}
+
 interface IIndex {
   name: string;
   partitionKey: string;
@@ -106,7 +121,7 @@ export default class Table {
 
   public async get(
     key: object | string,
-    options: any = {},
+    options: IGetInput = {},
     libOptions: ILibOptionsSingleItem = { verbose: false, forTrx: false }
   ) {
     if (!this.initialized) {
