@@ -1,24 +1,22 @@
 import * as AWS from "aws-sdk";
 import Table from "../../src/index";
 
-const tableWithPrimaryKey = new Table("Clevo-Raw-Speech-Table");
+const tableWithPrimaryKey = new Table("Clevo-Processed-Speech-Table");
 const tableWithSortKey = new Table("Clevo-Categorized-Sentence-Table");
 console.error = jest.fn();
 
-const simpleKeyStr = "351244_208_153939";
+const simpleKeyStr = "20170630182315_966_15842646466_601";
 const simpleKey = { fileName: simpleKeyStr };
 const nonExistKey = { fileName: "not exist" };
 const composedKey = { categoryName: "查询扣款", fileNameBeginTime: "20170623160058_966_13436475398_601.wav-16940" };
 
-beforeAll(async () => {
-  const localDynamodb = new AWS.DynamoDB({
+beforeAll(() => {
+  const dynamoOptions = {
     region: "us-west-2",
     endpoint: "http://localhost:8000"
-  });
-  const localClient = new AWS.DynamoDB.DocumentClient({
-    region: "us-west-2",
-    endpoint: "http://localhost:8000"
-  });
+  };
+  const localDynamodb = new AWS.DynamoDB(dynamoOptions);
+  const localClient = new AWS.DynamoDB.DocumentClient(dynamoOptions);
 
   Table.replaceDynamoClient(localDynamodb, localClient);
 });

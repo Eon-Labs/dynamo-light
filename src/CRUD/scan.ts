@@ -41,8 +41,10 @@ export default async function getAll({
     }
     return result;
   } catch (error) {
-    console.error(`Unable to get all items from ${tableName}. Error JSON:`, JSON.stringify(error), error.stack);
-    console.log("params", JSON.stringify(params));
+    if (verbose) {
+      console.error(`Unable to get all items from ${tableName}. Error JSON:`, JSON.stringify(error), error.stack);
+      console.log("params", JSON.stringify(params));
+    }
     throw error;
   }
 }

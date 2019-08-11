@@ -8,16 +8,10 @@ import queryItems from "./CRUD/query";
 import getAllItems from "./CRUD/scan";
 import transactWrite from "./CRUD/transactWrite";
 import updateItem from "./CRUD/update";
+import { UpdateItemInput } from "./types";
 
 let dynamodb = new AWS.DynamoDB();
 let docClient = new AWS.DynamoDB.DocumentClient();
-
-type TableId = string;
-type TableName = string;
-type TableNameList = TableName[];
-type TableStatus = "CREATING" | "UPDATING" | "DELETING" | "ACTIVE" | string;
-
-// let test: AWS.DynamoDB.DocumentClient.GetItemInput;
 
 interface IGetInput {
   AttributesToGet?: any;
@@ -175,7 +169,7 @@ export default class Table {
   public async update(
     key: any,
     newFields: any,
-    options: any = {},
+    options: UpdateItemInput = {},
     libOptions: ILibOptionsSingleItem = { verbose: false, forTrx: false }
   ) {
     if (!this.initialized) {
@@ -189,12 +183,12 @@ export default class Table {
     if (!this.isValidKey(key)) {
       throw new Error(`Invalid Key: ${JSON.stringify(key)}`);
     }
+
     const { verbose, forTrx } = libOptions;
     return updateItem({
       docClient,
       key,
       tableName: this.tableName,
-
       newFields,
       options,
       verbose,
@@ -208,7 +202,7 @@ export default class Table {
       partitionKeyValue,
       sortKeyOperator,
       sortKeyValue
-    }: { indexName: string; partitionKeyValue: string; sortKeyOperator: string; sortKeyValue: string },
+    }: { indexName?: string; partitionKeyValue: string; sortKeyOperator?: string; sortKeyValue?: string },
     options: any = {},
     libOptions: ILibOptionsMultiItem = { verbose: false, pagination: true }
   ) {
@@ -216,9 +210,12 @@ export default class Table {
       await this.initTable();
     }
 
-    const index = this.indexMap.get(indexName);
-    if (indexName && !index) {
-      throw new Error(`Index ${indexName} doesn't belong to table ${this.tableName}`);
+    let index;
+    if (indexName) {
+      index = this.indexMap.get(indexName);
+      if (indexName && !index) {
+        throw new Error(`Index ${indexName} doesn't belong to table ${this.tableName}`);
+      }
     }
 
     const partitionKey = index ? index.partitionKey : this.partitionKey;

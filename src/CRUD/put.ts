@@ -45,8 +45,10 @@ export default async function create({
     }
     return params;
   } catch (err) {
-    console.error(`Unable to insert item into ${tableName}. Error JSON:`, JSON.stringify(err), err.stack);
-    console.log("params", JSON.stringify(params));
+    if (verbose) {
+      console.error(`Unable to insert item into ${tableName}. Error JSON:`, JSON.stringify(err), err.stack);
+      console.log("params", JSON.stringify(params));
+    }
     throw err;
   }
 }

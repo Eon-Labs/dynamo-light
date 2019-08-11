@@ -19,12 +19,14 @@ export default async function transactWrite({ docClient, transactions, options, 
     }
     return data;
   } catch (err) {
-    console.error(
-      `Unable to perform transact write operation ${JSON.stringify(transactions)}. Error JSON:`,
-      JSON.stringify(err),
-      err.stack
-    );
-    console.log("params", JSON.stringify(params));
+    if (verbose) {
+      console.error(
+        `Unable to perform transact write operation ${JSON.stringify(transactions)}. Error JSON:`,
+        JSON.stringify(err),
+        err.stack
+      );
+      console.log("params", JSON.stringify(params));
+    }
     throw err;
   }
 }

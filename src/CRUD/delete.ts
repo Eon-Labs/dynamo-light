@@ -37,8 +37,10 @@ export default async function deleteItem({ docClient, tableName, key, options = 
       return data;
     }
   } catch (error) {
-    console.error(error);
-    console.log("params", JSON.stringify(params));
+    if (verbose) {
+      console.error(error);
+      console.log("params", JSON.stringify(params));
+    }
     throw error;
   }
 }

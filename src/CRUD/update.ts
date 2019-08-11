@@ -71,12 +71,14 @@ export default async function update({
     }
     return data;
   } catch (err) {
-    console.error(
-      `Unable to update in table ${tableName} for the following fields: ${JSON.stringify(rawNewFields)}`,
-      JSON.stringify(err),
-      err.stack
-    );
-    console.log("params", JSON.stringify(params));
+    if (verbose) {
+      console.error(
+        `Unable to update in table ${tableName} for the following fields: ${JSON.stringify(rawNewFields)}`,
+        JSON.stringify(err),
+        err.stack
+      );
+      console.log("Error request params: ", JSON.stringify(params));
+    }
     throw err;
   }
 }

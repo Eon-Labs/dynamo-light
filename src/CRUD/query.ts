@@ -73,8 +73,10 @@ export default async function query({
     }
     return result;
   } catch (error) {
-    console.error(`Unable to query items from ${tableName}. Error JSON:`, JSON.stringify(error), error.stack);
-    console.log("params", JSON.stringify(params));
+    if (verbose) {
+      console.error(`Unable to query items from ${tableName}. Error JSON:`, JSON.stringify(error), error.stack);
+      console.log("params", JSON.stringify(params));
+    }
     throw error;
   }
 }

@@ -42,8 +42,10 @@ export default async function get({ docClient, tableName, key, options = {}, ver
 
     return data;
   } catch (err) {
-    console.error(`Unable to get item from ${tableName}. Error JSON:`, JSON.stringify(err), err.stack);
-    console.log("params", JSON.stringify(params));
+    if (verbose) {
+      console.error(`Unable to get item from ${tableName}. Error JSON:`, JSON.stringify(err), err.stack);
+      console.log("Error request params: ", JSON.stringify(params));
+    }
     throw err;
   }
 }

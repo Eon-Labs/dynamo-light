@@ -14,12 +14,12 @@ custom:
     seed:
       test:
         sources:
+          - table: Clevo-Processed-Speech-Table
+            rawsources: [./Clevo-Processed-Speech-Table.json]
           - table: Clevo-Raw-Speech-Table
             rawsources: [./Clevo-Raw-Speech-Table.json]
           - table: Clevo-Categorized-Sentence-Table
             rawsources: [./Clevo-Categorized-Sentence-Table.json]
-    #     - table: users
-    #       rawsources: [./fake-test-users.json]
 
 provider:
   name: aws
@@ -32,6 +32,17 @@ resources:
       Type: "AWS::DynamoDB::Table"
       Properties:
         TableName: Clevo-Raw-Speech-Table
+        AttributeDefinitions:
+          - AttributeName: fileName
+            AttributeType: S
+        KeySchema:
+          - AttributeName: fileName
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+    ClevoProcessedSpeechTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        TableName: Clevo-Processed-Speech-Table
         AttributeDefinitions:
           - AttributeName: fileName
             AttributeType: S
@@ -53,24 +64,4 @@ resources:
             KeyType: HASH
           - AttributeName: fileNameBeginTime
             KeyType: RANGE
-        BillingMode: PAY_PER_REQUEST
-    APIKeysTable:
-      Type: "AWS::DynamoDB::Table"
-      Properties:
-        TableName: APIKeys
-        AttributeDefinitions:
-          - AttributeName: key
-            AttributeType: S
-          - AttributeName: userName
-            AttributeType: S
-        KeySchema:
-          - AttributeName: key
-            KeyType: HASH
-        GlobalSecondaryIndexes:
-          - IndexName: userName-index
-            KeySchema:
-              - AttributeName: userName
-                KeyType: HASH
-            Projection:
-              ProjectionType: ALL
         BillingMode: PAY_PER_REQUEST
