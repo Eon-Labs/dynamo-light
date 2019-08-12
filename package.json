@@ -14,7 +14,8 @@
     "preversion": "npm run lint",
     "version": "npm run format && git add -A src",
     "postversion": "git push && git push --tags",
-    "createTestEnv": "cd test/local-dynamo && sls dynamodb start",
+    "setupTestEnv": "cd test/local-dynamo && sls dynamodb install",
+    "startDynamo": "cd test/local-dynamo && sls dynamodb start",
     "reseedTestEnv": "cd test/local-dynamo && sls dynamodb seed --seed=test"
   },
   "repository": {

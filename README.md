@@ -65,6 +65,28 @@ const users = await userTable.scan(); // with pagination
 const users = await userTable.scan({}, { pagination: false }); // fetch all
 ```
 
+## Develop:
+
+#### Test
+
+Install dynamodb local:
+
+```
+npm run setupTestEnv
+```
+
+Spin up a local dynamodb and seed DB tables:
+
+```
+npm run startDynamo
+```
+
+In a different tab, you can run tests using
+
+```
+npm run test
+```
+
 <!-- ## More Examples:
 
 Using for tables with sortKeys: -->
