@@ -17,6 +17,10 @@
     "createTestEnv": "cd test/local-dynamo && sls dynamodb start",
     "reseedTestEnv": "cd test/local-dynamo && sls dynamodb seed --seed=test"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ChenLi0830/dynamoLight"
+  },
   "dependencies": {
     "aws-sdk": "^2.504.0"
   },
