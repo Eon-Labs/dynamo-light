@@ -1,17 +1,8 @@
-## BETA: A light weight library to access dynamodb tables
+## A light library to access dynamodb tables
 
-## Please note that this library is in beta version, use on your own risk
+Easy and quick access to your dyanmodb tables.
 
-<!-- It provides the following common methods for each dynamodb table / indexes:
-
-- put
-- delete
-- get
-- scan
-- query
-- update -->
-
-<!-- ### Installation
+### Installation
 
 ```
 npm install --save dynamo-light
@@ -27,57 +18,55 @@ export AWS_SECRET_ACCESS_KEY="Your AWS Secret Access Key"
 export AWS_REGION="us-west-2"
 ```
 
-### Usage Example:
+### Quick Start:
 
-Assume you have a simple Dynamodb table, whose table name is `Users`, and hashKey `userId`.
+Assume you have a simple table - `Users` with partitionKey `userName` (demo purpose only, use an id in real projects).
 
 ```javascript
-const TableModel = require("dynamo-light");
+const Table = require("dynamo-light");
+const userTable = new Table("Users");
+```
 
-const userTable = new TableModel({ name: "Users"});
+#### Get:
 
-await userTable.create({
-  userId: "357",
-  username: "Juan Guzman"
+```javascript
+const user = await userTable.get("DonaldTrump");
+```
+
+#### Put:
+
+```javascript
+await userTable.put({
+  username: "JackMa",
+  age: 53,
+  occupation: "entrepreneur"
 });
-
-const result = await userTable.get({ userId: "357" }); // returns the user
 ```
 
 #### Update:
 
 ```javascript
-const key = {
-  userId: "357"
-};
-const newFields = {
-  username: "c.lee"
-};
-const result = await userTable.update(key, newFields);
-console.log(result.Attributes.username); // c.lee
+await userTable.update("JackMa", {
+  age: 54,
+  occupation: "charitarian"
+});
 ```
 
 #### Delete:
 
 ```javascript
-const key = {
-  userId: "357"
-};
-const result = await userTable.delete(key);
-console.log(result.Attributes.key); // 357
+await userTable.delete("JackMa");
 ```
 
-#### getAll:
-
-Get all your users in the table, library will send as many requests as needed to get all the data.
+#### Scan:
 
 ```javascript
-const result = await userTable.getAll({
-  pagination: false
-});
-console.log(result.Items);
+const users = await userTable.scan();
 ```
 
+<!-- ## More Examples:  -->
+
+<!--
 In case you want pagination,
 
 ```javascript
@@ -90,6 +79,7 @@ if (result.LastEvaluatedKey) {
 }
 ```
 
+<!--
 ### Extends Table model:
 
 Example of a complex table model with **global secondary indexes** and **customized methods**:
@@ -256,4 +246,4 @@ When querying with the options `Select: "COUNT"`, throws an error due to the Ite
 ```javascript
 const result = await UserBalancesTable.queryByUsername({ username: "aleung" }, { Select: "COUNT" });
 ```
--->
+ -->

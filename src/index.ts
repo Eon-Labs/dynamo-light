@@ -248,7 +248,7 @@ export default class Table {
     if (!this.initialized) {
       await this.initTable();
     }
-    const { indexName } = param;
+    const { indexName, filters } = param;
     const { verbose, pagination } = libOptions;
     return getAllItems({
       docClient,
