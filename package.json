@@ -1,6 +1,6 @@
 {
   "name": "dynamo-light",
-  "version": "0.0.8",
+  "version": "0.1.0",
   "description": "A light weight library to use dynamodb tables",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
