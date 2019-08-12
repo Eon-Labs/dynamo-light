@@ -1,6 +1,4 @@
-## A light library to access dynamodb tables
-
-Easy and quick access to your DynamoDB tables.
+## A light library for easy access to dynamodb tables
 
 ### Installation
 
@@ -18,22 +16,24 @@ export AWS_SECRET_ACCESS_KEY="Your AWS Secret Access Key"
 export AWS_REGION="us-west-2"
 ```
 
-### Quick Start:
+### Usage:
 
-Assume you have a simple table - `Users` with partitionKey `userName` (demo purpose only, use unique field - such as uuid, in real projects).
+Assume you have a simple table - `Users` with partitionKey `userName`.
+
+#### Init Table
 
 ```javascript
 const Table = require("dynamo-light");
 const userTable = new Table("Users");
 ```
 
-#### Get:
+#### Get Item:
 
 ```javascript
 const user = await userTable.get("DonaldTrump");
 ```
 
-#### Put:
+#### Put Item:
 
 ```javascript
 await userTable.put({
@@ -61,8 +61,8 @@ await userTable.delete("JackMa");
 #### Scan:
 
 ```javascript
-const users = await userTable.scan(); // with pagination
-const users = await userTable.scan({}, { pagination: false }); // fetch all
+const users = await userTable.scan(); // scan with pagination
+const users = await userTable.scan({}, { pagination: false }); // fetch all items
 ```
 
 <!-- ## More Examples:
