@@ -1,7 +1,7 @@
 /**
  * Transact write from table
  */
-export default async function transactWrite({ docClient, transactions, options, verbose }) {
+export default async function transactWrite({ docClient, transactions, options, verbose = false }) {
   let params;
   try {
     const { ClientRequestToken, ReturnConsumedCapacity = "TOTAL", ReturnItemCollectionMetrics = "NONE" } = options;

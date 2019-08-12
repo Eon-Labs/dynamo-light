@@ -8,18 +8,10 @@ import queryItems from "./CRUD/query";
 import getAllItems from "./CRUD/scan";
 import transactWrite from "./CRUD/transactWrite";
 import updateItem from "./CRUD/update";
-import { UpdateItemInput } from "./types";
+import { DeleteItemInput, GetItemInput, PutItemInput, QueryInput, ScanInput, UpdateItemInput } from "./types";
 
 let dynamodb = new AWS.DynamoDB();
 let docClient = new AWS.DynamoDB.DocumentClient();
-
-interface IGetInput {
-  AttributesToGet?: any;
-  ConsistentRead?: any;
-  ReturnConsumedCapacity?: any;
-  ProjectionExpression?: any;
-  ExpressionAttributeNames?: any;
-}
 
 interface IIndex {
   name: string;
@@ -27,21 +19,10 @@ interface IIndex {
   sortKey: string | undefined;
 }
 
-interface IBaseLibOptions {
-  verbose?: boolean;
-}
-
-interface ILibOptionsSingleItem extends IBaseLibOptions {
-  forTrx?: boolean;
-}
-
-interface ILibOptionsMultiItem extends IBaseLibOptions {
-  pagination?: boolean;
-}
-
 export default class Table {
-  public static transactWrite(transactions: any, options = {}, libOptions: IBaseLibOptions = { verbose: false }) {
-    const { verbose } = libOptions;
+  public static transactWrite(transactions: any, options = { verbose: false }) {
+    const { verbose } = options;
+    delete options.verbose;
     return transactWrite({ docClient, transactions, options, verbose });
   }
 
@@ -113,11 +94,7 @@ export default class Table {
     return noExtraField && containsPartitionKey;
   }
 
-  public async get(
-    key: object | string,
-    options: IGetInput = {},
-    libOptions: ILibOptionsSingleItem = { verbose: false, forTrx: false }
-  ) {
+  public async get(key: object | string, options: GetItemInput = {}) {
     if (!this.initialized) {
       await this.initTable();
     }
@@ -130,27 +107,21 @@ export default class Table {
       throw new Error(`Invalid Key: ${JSON.stringify(key)}`);
     }
 
-    const { verbose, forTrx } = libOptions;
+    const { verbose, forTrx } = this.retrieveAndDeleteDLOptions(options);
+
     return getItem({ docClient, tableName: this.tableName, key, options, verbose, forTrx });
   }
 
-  public async put(
-    item: any,
-    options: any = {},
-    libOptions: ILibOptionsSingleItem = { verbose: false, forTrx: false }
-  ) {
+  public async put(item: any, options: PutItemInput = {}) {
     if (!this.initialized) {
       await this.initTable();
     }
-    const { verbose, forTrx } = libOptions;
-    return createItem({ docClient, tableName: this.tableName, item, options, verbose, forTrx });
+    const { verbose, forTrx, autoTimeStamp } = this.retrieveAndDeleteDLOptions(options);
+
+    return createItem({ docClient, tableName: this.tableName, item, options, verbose, forTrx, autoTimeStamp });
   }
 
-  public async delete(
-    key: any,
-    options: any = {},
-    libOptions: ILibOptionsSingleItem = { verbose: false, forTrx: false }
-  ) {
+  public async delete(key: any, options: DeleteItemInput = {}) {
     if (!this.initialized) {
       await this.initTable();
     }
@@ -162,16 +133,13 @@ export default class Table {
     if (!this.isValidKey(key)) {
       throw new Error(`Invalid Key: ${JSON.stringify(key)}`);
     }
-    const { verbose, forTrx } = libOptions;
+
+    const { verbose, forTrx } = this.retrieveAndDeleteDLOptions(options);
+
     return deleteItem({ docClient, tableName: this.tableName, key, options, verbose, forTrx });
   }
 
-  public async update(
-    key: any,
-    newFields: any,
-    options: UpdateItemInput = {},
-    libOptions: ILibOptionsSingleItem = { verbose: false, forTrx: false }
-  ) {
+  public async update(key: any, newFields: any, options: UpdateItemInput = {}) {
     if (!this.initialized) {
       await this.initTable();
     }
@@ -184,7 +152,8 @@ export default class Table {
       throw new Error(`Invalid Key: ${JSON.stringify(key)}`);
     }
 
-    const { verbose, forTrx } = libOptions;
+    const { verbose, forTrx, autoTimeStamp } = this.retrieveAndDeleteDLOptions(options);
+
     return updateItem({
       docClient,
       key,
@@ -192,7 +161,8 @@ export default class Table {
       newFields,
       options,
       verbose,
-      forTrx
+      forTrx,
+      autoTimeStamp
     });
   }
 
@@ -203,8 +173,7 @@ export default class Table {
       sortKeyOperator,
       sortKeyValue
     }: { indexName?: string; partitionKeyValue: string; sortKeyOperator?: string; sortKeyValue?: string },
-    options: any = {},
-    libOptions: ILibOptionsMultiItem = { verbose: false, pagination: true }
+    options: QueryInput = {}
   ) {
     if (!this.initialized) {
       await this.initTable();
@@ -224,7 +193,8 @@ export default class Table {
       sortKey = index ? index.sortKey : this.sortKey;
     }
 
-    const { verbose, pagination } = libOptions;
+    const { verbose, pagination } = this.retrieveAndDeleteDLOptions(options);
+
     return queryItems({
       docClient,
       tableName: this.tableName,
@@ -240,16 +210,14 @@ export default class Table {
     });
   }
 
-  public async scan(
-    param: any = {},
-    options: any = {},
-    libOptions: ILibOptionsMultiItem = { verbose: false, pagination: true }
-  ) {
+  public async scan(param: any = {}, options: ScanInput = {}) {
     if (!this.initialized) {
       await this.initTable();
     }
     const { indexName, filters } = param;
-    const { verbose, pagination } = libOptions;
+
+    const { verbose, pagination } = this.retrieveAndDeleteDLOptions(options);
+
     return getAllItems({
       docClient,
       tableName: this.tableName,
@@ -277,6 +245,25 @@ export default class Table {
   private parsePartitionKey(partitionKeyValue: string): object {
     return {
       [this.partitionKey as string]: partitionKeyValue
+    };
+  }
+
+  /**
+   * Retrieve options specified by DL(dynamo-light), and remove them from the option param
+   * @param options
+   */
+  private retrieveAndDeleteDLOptions(options) {
+    const { verbose = false, forTrx = false, autoTimeStamp = false, pagination = true } = options;
+    delete options.verbose;
+    delete options.forTrx;
+    delete options.autoTimeStamp;
+    delete options.pagination;
+
+    return {
+      verbose,
+      forTrx,
+      autoTimeStamp,
+      pagination
     };
   }
 }

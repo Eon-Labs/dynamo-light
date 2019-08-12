@@ -1,14 +1,14 @@
-export type TableName = string;
+type TableName = string;
 
-export type AttributeValue = any;
+type AttributeValue = any;
 
-export type AttributeAction = "ADD" | "PUT" | "DELETE" | string;
+type AttributeAction = "ADD" | "PUT" | "DELETE" | string;
 
-export type KeySchemaAttributeName = string;
+type KeySchemaAttributeName = string;
 
-export type ScalarAttributeType = "S" | "N" | "B" | string;
+type ScalarAttributeType = "S" | "N" | "B" | string;
 
-export interface AttributeDefinition {
+interface AttributeDefinition {
   /**
    * A name for the attribute.
    */
@@ -19,32 +19,32 @@ export interface AttributeDefinition {
   AttributeType: ScalarAttributeType;
 }
 
-export type AttributeDefinitions = AttributeDefinition[];
-export interface AttributeMap {
+type AttributeDefinitions = AttributeDefinition[];
+interface AttributeMap {
   [key: string]: AttributeValue;
 }
-export type AttributeName = string;
-export type AttributeNameList = AttributeName[];
-export interface AttributeUpdates {
+type AttributeName = string;
+type AttributeNameList = AttributeName[];
+interface AttributeUpdates {
   [key: string]: AttributeValueUpdate;
 }
 
-export type ProjectionExpression = string;
-export type ProjectionType = "ALL" | "KEYS_ONLY" | "INCLUDE" | string;
+type ProjectionExpression = string;
+type ProjectionType = "ALL" | "KEYS_ONLY" | "INCLUDE" | string;
 
-export interface ExpressionAttributeNameMap {
+interface ExpressionAttributeNameMap {
   [key: string]: AttributeName;
 }
-export type ExpressionAttributeNameVariable = string;
-export interface ExpressionAttributeValueMap {
+type ExpressionAttributeNameVariable = string;
+interface ExpressionAttributeValueMap {
   [key: string]: AttributeValue;
 }
-export type ExpressionAttributeValueVariable = string;
-export interface FilterConditionMap {
+type ExpressionAttributeValueVariable = string;
+interface FilterConditionMap {
   [key: string]: Condition;
 }
 
-export interface AttributeValueUpdate {
+interface AttributeValueUpdate {
   /**
    * Represents the data for an attribute. Each attribute value is described as a name-value pair. The name is the data type, and the value is the data itself. For more information, see Data Types in the Amazon DynamoDB Developer Guide.
    */
@@ -55,11 +55,11 @@ export interface AttributeValueUpdate {
   Action?: AttributeAction;
 }
 
-export interface Key {
+interface Key {
   [key: string]: AttributeValue;
 }
 
-export interface ExpectedAttributeValue {
+interface ExpectedAttributeValue {
   /**
    * Represents the data for the expected attribute. Each attribute value is described as a name-value pair. The name is the data type, and the value is the data itself. For more information, see Data Types in the Amazon DynamoDB Developer Guide.
    */
@@ -78,23 +78,35 @@ export interface ExpectedAttributeValue {
   AttributeValueList?: AttributeValueList;
 }
 
-export type ReturnConsumedCapacity = "INDEXES" | "TOTAL" | "NONE" | string;
+type ReturnConsumedCapacity = "INDEXES" | "TOTAL" | "NONE" | string;
 
-export interface ExpectedAttributeMap {
+interface ExpectedAttributeMap {
   [key: string]: ExpectedAttributeValue;
 }
 
-export type UpdateExpression = string;
+type UpdateExpression = string;
 
-export type ReturnValue = "NONE" | "ALL_OLD" | "UPDATED_OLD" | "ALL_NEW" | "UPDATED_NEW" | string;
+type ReturnValue = "NONE" | "ALL_OLD" | "UPDATED_OLD" | "ALL_NEW" | "UPDATED_NEW" | string;
 
-export type ReturnItemCollectionMetrics = "SIZE" | "NONE" | string;
+type ReturnItemCollectionMetrics = "SIZE" | "NONE" | string;
 
-export type ConditionExpression = string;
-export type ConditionalOperator = "AND" | "OR" | string;
-export type ConsistentRead = boolean;
+type ConditionExpression = string;
+type ConditionalOperator = "AND" | "OR" | string;
+type ConsistentRead = boolean;
 
 export interface UpdateItemInput {
+  /**
+   * Whether to enable verbose mode for dynamo light
+   */
+  verbose?: boolean;
+  /**
+   * Whether this operation is used in an transaction
+   */
+  forTrx?: boolean;
+  /**
+   * Whether to enable autoTimeStamp, if true 'updatedAt' field will be updated for each update operation
+   */
+  autoTimeStamp?: boolean;
   /**
    * This is a legacy parameter. Use UpdateExpression instead. For more information, see AttributeUpdates in the Amazon DynamoDB Developer Guide.
    */
@@ -140,6 +152,14 @@ export interface UpdateItemInput {
 
 export interface GetItemInput {
   /**
+   * Whether to enable verbose mode for dynamo light
+   */
+  verbose?: boolean;
+  /**
+   * Whether this operation is used in an transaction
+   */
+  forTrx?: boolean;
+  /**
    * This is a legacy parameter. Use ProjectionExpression instead. For more information, see AttributesToGet in the Amazon DynamoDB Developer Guide.
    */
   AttributesToGet?: AttributeNameList;
@@ -158,11 +178,23 @@ export interface GetItemInput {
   ExpressionAttributeNames?: ExpressionAttributeNameMap;
 }
 
-export interface PutItemInputAttributeMap {
+interface PutItemInputAttributeMap {
   [key: string]: AttributeValue;
 }
 
 export interface PutItemInput {
+  /**
+   * Whether to enable verbose mode for dynamo light
+   */
+  verbose?: boolean;
+  /**
+   * Whether this operation is used in an transaction
+   */
+  forTrx?: boolean;
+  /**
+   * Whether to enable autoTimeStamp, if true 'createdAt' and 'updatedAt' fields will be created for each put operation
+   */
+  autoTimeStamp?: boolean;
   /**
    * This is a legacy parameter. Use ConditionExpression instead. For more information, see Expected in the Amazon DynamoDB Developer Guide.
    */
@@ -196,6 +228,14 @@ export interface PutItemInput {
 
 export interface DeleteItemInput {
   /**
+   * Whether to enable verbose mode for dynamo light
+   */
+  verbose?: boolean;
+  /**
+   * Whether this operation is used in an transaction
+   */
+  forTrx?: boolean;
+  /**
    * This is a legacy parameter. Use ConditionExpression instead. For more information, see Expected in the Amazon DynamoDB Developer Guide.
    */
   Expected?: ExpectedAttributeMap;
@@ -225,10 +265,10 @@ export interface DeleteItemInput {
    */
   ExpressionAttributeValues?: ExpressionAttributeValueMap;
 }
-export type IndexName = string;
-export type Select = "ALL_ATTRIBUTES" | "ALL_PROJECTED_ATTRIBUTES" | "SPECIFIC_ATTRIBUTES" | "COUNT" | string;
-export type PositiveIntegerObject = number;
-export type ComparisonOperator =
+type IndexName = string;
+type Select = "ALL_ATTRIBUTES" | "ALL_PROJECTED_ATTRIBUTES" | "SPECIFIC_ATTRIBUTES" | "COUNT" | string;
+type PositiveIntegerObject = number;
+type ComparisonOperator =
   | "EQ"
   | "NE"
   | "IN"
@@ -244,14 +284,14 @@ export type ComparisonOperator =
   | "BEGINS_WITH"
   | string;
 
-export interface KeyConditions {
+interface KeyConditions {
   [key: string]: Condition;
 }
-export type AttributeValueList = AttributeValue[];
+type AttributeValueList = AttributeValue[];
 
-export type BooleanObject = boolean;
+type BooleanObject = boolean;
 
-export interface Condition {
+interface Condition {
   /**
    * One or more values to evaluate against the supplied attribute. The number of values in the list depends on the ComparisonOperator being used. For type Number, value comparisons are numeric. String value comparisons for greater than, equals, or less than are based on ASCII character code values. For example, a is greater than A, and a is greater than B. For a list of code values, see http://en.wikipedia.org/wiki/ASCII#ASCII_printable_characters. For Binary, DynamoDB treats each byte of the binary data as unsigned when it compares binary values.
    */
@@ -261,17 +301,17 @@ export interface Condition {
    */
   ComparisonOperator: ComparisonOperator;
 }
-export type KeyExpression = string;
+type KeyExpression = string;
 
 export interface QueryInput {
   /**
-   * The name of the table containing the requested items.
+   * Whether to enable verbose mode for dynamo light
    */
-  TableName: TableName;
+  verbose?: boolean;
   /**
-   * The name of an index to query. This index can be any local secondary index or global secondary index on the table. Note that if you use the IndexName parameter, you must also provide TableName.
+   * Whether to enable pagination. If false the library will keep fetching until get all required items.
    */
-  IndexName?: IndexName;
+  pagination?: boolean;
   /**
    * The attributes to be returned in the result. You can retrieve all item attributes, specific item attributes, the count of matching items, or in the case of an index, some or all of the attributes projected into the index.    ALL_ATTRIBUTES - Returns all of the item attributes from the specified table or index. If you query a local secondary index, then for each matching item in the index, DynamoDB fetches the entire item from the parent table. If the index is configured to project all item attributes, then all of the data can be obtained from the local secondary index, and no fetching is required.    ALL_PROJECTED_ATTRIBUTES - Allowed only when querying an index. Retrieves all attributes that have been projected into the index. If the index is configured to project all attributes, this return value is equivalent to specifying ALL_ATTRIBUTES.    COUNT - Returns the number of matching items, rather than the matching items themselves.    SPECIFIC_ATTRIBUTES - Returns only the attributes listed in AttributesToGet. This return value is equivalent to specifying AttributesToGet without specifying any value for Select. If you query or scan a local secondary index and request only attributes that are projected into that index, the operation will read only the index and not the table. If any of the requested attributes are not projected into the local secondary index, DynamoDB fetches each of these attributes from the parent table. This extra fetching incurs additional throughput cost and latency. If you query or scan a global secondary index, you can only request attributes that are projected into the index. Global secondary index queries cannot fetch attributes from the parent table.   If neither Select nor AttributesToGet are specified, DynamoDB defaults to ALL_ATTRIBUTES when accessing a table, and ALL_PROJECTED_ATTRIBUTES when accessing an index. You cannot use both Select and AttributesToGet together in a single request, unless the value for Select is SPECIFIC_ATTRIBUTES. (This usage is equivalent to specifying AttributesToGet without any value for Select.)  If you use the ProjectionExpression parameter, then the value for Select can only be SPECIFIC_ATTRIBUTES. Any other value for Select will return an error.
    */
@@ -331,18 +371,22 @@ export interface QueryInput {
   ExpressionAttributeValues?: ExpressionAttributeValueMap;
 }
 
-export type ScanSegment = number;
-export type ScanTotalSegments = number;
+type ScanSegment = number;
+type ScanTotalSegments = number;
 
 export interface ScanInput {
   /**
-   * The name of the table containing the requested items; or, if you provide IndexName, the name of the table to which that index belongs.
+   * Whether to enable verbose mode for dynamo light
    */
-  TableName: TableName;
+  verbose?: boolean;
   /**
-   * The name of a secondary index to scan. This index can be any local secondary index or global secondary index. Note that if you use the IndexName parameter, you must also provide TableName.
+   * Whether to enable pagination. If false the library will keep fetching until get all required items.
    */
-  IndexName?: IndexName;
+  pagination?: boolean;
+  // /**
+  //  * The name of a secondary index to scan. This index can be any local secondary index or global secondary index. Note that if you use the IndexName parameter, you must also provide TableName.
+  //  */
+  // IndexName?: IndexName;
   /**
    * This is a legacy parameter. Use ProjectionExpression instead. For more information, see AttributesToGet in the Amazon DynamoDB Developer Guide.
    */

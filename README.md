@@ -1,6 +1,6 @@
 ## A light library to access dynamodb tables
 
-Easy and quick access to your dyanmodb tables.
+Easy and quick access to your DynamoDB tables.
 
 ### Installation
 
@@ -61,10 +61,13 @@ await userTable.delete("JackMa");
 #### Scan:
 
 ```javascript
-const users = await userTable.scan();
+const users = await userTable.scan(); // with pagination
+const users = await userTable.scan({}, { pagination: false }); // fetch all
 ```
 
-<!-- ## More Examples:  -->
+<!-- ## More Examples:
+
+Using for tables with sortKeys: -->
 
 <!--
 In case you want pagination,

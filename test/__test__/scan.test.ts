@@ -23,8 +23,8 @@ test("scan generally with no input", async () => {
 });
 
 test("scan with pagination to be false", async () => {
-  const result1 = await tableWithMediumData.scan({}, {}, { pagination: true });
-  const result2 = await tableWithMediumData.scan({}, {}, { pagination: false });
+  const result1 = await tableWithMediumData.scan({}, { pagination: true });
+  const result2 = await tableWithMediumData.scan({}, { pagination: false });
   expect(result1.Items.length > 0).toBe(true);
   expect(result2.Items.length > 0).toBe(true);
   expect(result2.Items.length > result1.Items.length).toBe(true);
@@ -39,24 +39,13 @@ test("scan with options: FilterExpression", async () => {
 });
 
 test("scan with options: AttributesToGet and Limit", async () => {
-  const results = await tableWithMediumData.scan(
-    {},
-    {
-      AttributesToGet: ["usernameSymbol"],
-      Select: "SPECIFIC_ATTRIBUTES",
-      Limit: 5
-    }
-  );
-  let usernameSymbol = [];
-  results.Items.forEach(symbol => {
-    usernameSymbol = usernameSymbol.concat(Object.keys(symbol));
-  });
-  const checkSymbols = usernameSymbol.filter(symbols => symbols !== "usernameSymbol");
-  expect(checkSymbols.length).toBe(0);
-  expect(usernameSymbol).toEqual(expect.arrayContaining(["usernameSymbol"]));
-  // const result1 = await tableWithMediumData.scan({}, {}, { pagination: true });
-  // const result2 = await tableWithMediumData.scan({}, {}, { pagination: false });
-  // expect(result1.Items.length > 0).toBe(true);
-  // expect(result2.Items.length > 0).toBe(true);
-  // expect(result2.Items.length > result1.Items.length).toBe(true);
+  const options = {
+    AttributesToGet: ["fileExtension", "transcribedAt"],
+    Select: "SPECIFIC_ATTRIBUTES",
+    Limit: 5
+  };
+  const { Items: fetchedItems } = await tableWithMediumData.scan({}, options);
+  expect(fetchedItems.length).toBe(options.Limit);
+  expect(fetchedItems[0][options.AttributesToGet[0]]).toBeDefined();
+  expect(fetchedItems[0].organizationName).not.toBeDefined();
 });
