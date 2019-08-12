@@ -20,7 +20,7 @@ export AWS_REGION="us-west-2"
 
 ### Quick Start:
 
-Assume you have a simple table - `Users` with partitionKey `userName` (demo purpose only, use an id in real projects).
+Assume you have a simple table - `Users` with partitionKey `userName` (demo purpose only, use unique field - such as uuid, in real projects).
 
 ```javascript
 const Table = require("dynamo-light");
