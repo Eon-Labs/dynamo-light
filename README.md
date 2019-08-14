@@ -1,11 +1,8 @@
 ## A light library for easy access to dynamodb tables
 
 <a href="https://www.npmjs.com/package/dynamo-light"><img src="https://img.shields.io/npm/v/dynamo-light.svg?style=flat" alt="npm version"></a>
-
 <a href=""><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome"></a>
-
 <a href="https://github.com/prettier/prettier"><img alt="code style: prettier" src="https://img.shields.io/badge/code_style-prettier-ff69b4.svg"></a>
-
 <a href="https://github.com/facebook/jest"><img src="https://img.shields.io/badge/tested_with-jest-99424f.svg" alt="Tested with Jest"></a>
 
 ### Installation
