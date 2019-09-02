@@ -17,7 +17,7 @@ interface IIndex {
   sortKey: string | undefined;
 }
 
-export default class Table {
+export class Table {
   public static transactWrite(transactions: any, options = { verbose: false }) {
     const { verbose } = options;
     delete options.verbose;

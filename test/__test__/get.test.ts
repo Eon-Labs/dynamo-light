@@ -1,5 +1,5 @@
 import * as AWS from "aws-sdk";
-import Table from "../../src/index";
+import { Table } from "../../src/index";
 
 const tableWithPrimaryKey = new Table("Clevo-Processed-Speech-Table");
 const tableWithSortKey = new Table("Clevo-Categorized-Sentence-Table");
