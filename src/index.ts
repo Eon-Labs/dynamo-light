@@ -1,5 +1,3 @@
-import "./utils/env";
-
 import * as AWS from "aws-sdk";
 import deleteItem from "./CRUD/delete";
 import getItem from "./CRUD/get";

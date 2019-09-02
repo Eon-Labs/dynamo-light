@@ -33,7 +33,7 @@ const userTable = new Table("Users");
 #### Get:
 
 ```javascript
-const user = await userTable.get("DonaldTrump");
+const user = await userTable.get("WarrenBuffett");
 ```
 
 #### Put:
@@ -42,7 +42,7 @@ const user = await userTable.get("DonaldTrump");
 await userTable.put({
   username: "JackMa",
   age: 53,
-  occupation: "entrepreneur"
+  occupation: "investor"
 });
 ```
 
@@ -51,7 +51,7 @@ await userTable.put({
 ```javascript
 await userTable.update("JackMa", {
   age: 54,
-  occupation: "charitarian"
+  occupation: "entrepreneur"
 });
 ```
 
