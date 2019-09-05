@@ -65,8 +65,9 @@ export default async function query({
       if (params.Limit) {
         params.Limit -= fetchedData.Items.length;
       }
-      const noItemsToFetch = !fetchedData || !fetchedData.Items || fetchedData.Items.length === 0;
-      shouldKeepFetching = !pagination && params.Limit > 0 && LastEvaluatedKey !== "undefined" && !noItemsToFetch;
+      const wantToFetchMore = (params.Limit === undefined || params.Limit > 0) && !pagination;
+      const hasMoreToFetch = !!LastEvaluatedKey;
+      shouldKeepFetching = wantToFetchMore && hasMoreToFetch;
     }
     if (verbose) {
       console.log(`Successfully queried ${result.Count} items from table ${tableName}`);
