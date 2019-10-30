@@ -33,7 +33,13 @@ const userTable = new Table("Users");
 #### Get:
 
 ```javascript
-const user = await userTable.get("WarrenBuffett");
+const user = await userTable.get("WarrenBuffett"); // implicit keyExpression
+```
+
+OR
+
+```javascript
+const user = await userTable.get({ userName: "WarrenBuffett" }); // explicit keyExpression
 ```
 
 #### Put:
@@ -55,6 +61,18 @@ await userTable.update("JackMa", {
 });
 ```
 
+OR
+
+```javascript
+await userTable.update(
+  { userName: "JackMa" },
+  {
+    age: 54,
+    occupation: "entrepreneur"
+  }
+);
+```
+
 #### Delete:
 
 ```javascript
@@ -66,6 +84,91 @@ await userTable.delete("JackMa");
 ```javascript
 const users = await userTable.scan(); // with pagination
 const users = await userTable.scan({}, { pagination: false }); // fetch all
+```
+
+## More examples:
+
+### Tables with sortKey/hashKey:
+
+For a table `populationTable` that has `country` as partitionKey and `year` as sortKey:
+
+#### Get
+
+```javascript
+await populationTable.get({
+  country: "Canada",
+  year: 2000
+});
+```
+
+#### Put
+
+```javascript
+await populationTable.put({
+  country: "Canada",
+  year: 2001,
+  population: 31.01,
+  unit: "million",
+  alias: "CA"
+});
+```
+
+#### Update:
+
+```javascript
+await populationTable.update(
+  {
+    country: "Canada",
+    year: 2001
+  },
+  {
+    population: 31.02
+    // ... other new fields
+  }
+);
+```
+
+#### Delete:
+
+```javascript
+await populationTable.delete({
+  country: "Canada",
+  year: 2001
+});
+```
+
+#### Query:
+
+```javascript
+await populationTable.query(
+  {
+    country: "Canada"
+  },
+  { pagination: false }
+); // Returns all canada population records
+```
+
+```javascript
+await populationTable.query({
+  country: "Canada",
+  year: 1949,
+  sortKeyOperator: ">="
+}); // Returns canada population records whose year is larger or equals to 1949
+```
+
+### Tables with indexes:
+
+Assume table `populationTable` has a index `alias-year-index`, whose partitionKey is `alias` and sortKey is `year`:
+
+#### Query:
+
+```javascript
+await populationTable.query({
+  indexName: "alias-year-index",
+  alias: "CA",
+  year: 1949,
+  sortKeyOperator: ">="
+}); // Returns records whose year is larger or equals to 1949 and alias is "CA"
 ```
 
 ## Develop:

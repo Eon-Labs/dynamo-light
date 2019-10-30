@@ -35,9 +35,22 @@ resources:
         AttributeDefinitions:
           - AttributeName: fileName
             AttributeType: S
+          - AttributeName: organizationName
+            AttributeType: S
+          - AttributeName: createdAt
+            AttributeType: N
         KeySchema:
           - AttributeName: fileName
             KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: organizationName-createdAt-index
+            KeySchema:
+              - AttributeName: organizationName
+                KeyType: HASH
+              - AttributeName: createdAt
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
         BillingMode: PAY_PER_REQUEST
     ClevoProcessedSpeechTable:
       Type: "AWS::DynamoDB::Table"

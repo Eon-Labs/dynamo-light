@@ -60,7 +60,7 @@ export class Table {
     for (const indexRecord of GlobalSecondaryIndexes) {
       const { partitionKey: indexPartitionKey, sortKey: indexSortKey } = this.retrieveKeys(indexRecord.KeySchema);
       const index: IIndex = {
-        name: "UsernameIndex",
+        name: indexRecord.IndexName,
         partitionKey: indexPartitionKey as string,
         sortKey: indexSortKey
       };
@@ -165,17 +165,22 @@ export class Table {
   }
 
   public async query(
-    {
-      indexName,
-      partitionKeyValue,
-      sortKeyOperator,
-      sortKeyValue
-    }: { indexName?: string; partitionKeyValue: string; sortKeyOperator?: string; sortKeyValue?: string },
+    // queryKey: { indexName?: string; partitionKeyValue: string; sortKeyOperator?: string; sortKeyValue?: string },
+    queryKey: {
+      indexName?: string;
+      partitionKeyValue?: any;
+      sortKeyOperator?: string;
+      sortKeyValue?: any;
+      [key: string]: any;
+    },
     options: QueryInput = {}
   ) {
     if (!this.initialized) {
       await this.initTable();
     }
+
+    let { partitionKeyValue, sortKeyValue, sortKeyOperator } = queryKey;
+    const { indexName } = queryKey;
 
     let index;
     if (indexName) {
@@ -187,8 +192,29 @@ export class Table {
 
     const partitionKey = index ? index.partitionKey : this.partitionKey;
     let sortKey;
-    if (sortKeyValue) {
-      sortKey = index ? index.sortKey : this.sortKey;
+    sortKey = index ? index.sortKey : this.sortKey;
+    // 如果sortKeyValue不存在，则设置sortKey为undefined
+    if (queryKey[sortKey] === undefined && queryKey.sortKeyValue === undefined) {
+      sortKey = undefined;
+    } else {
+      if (sortKeyOperator === undefined) {
+        sortKeyOperator = "=";
+      }
+    }
+
+    // 智能填partitionKeyValue和sortKeyValue
+    if (partitionKeyValue === undefined) {
+      if (queryKey[partitionKey] !== undefined) {
+        partitionKeyValue = queryKey[partitionKey];
+        delete queryKey[partitionKey];
+      } else {
+        throw new Error("partitionKeyValue is undefined");
+      }
+
+      if (sortKey !== undefined) {
+        sortKeyValue = queryKey[sortKey];
+        delete queryKey[sortKey];
+      }
     }
 
     const { verbose, pagination } = this.retrieveAndDeleteDLOptions(options);
