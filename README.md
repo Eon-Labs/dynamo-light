@@ -177,6 +177,12 @@ await populationTable.query({
 }); // Returns records whose year is larger or equals to 1949 and alias is "CA"
 ```
 
+#### Available SortKeyOperators:
+
+= | < | <= | > | >= | BEGINS_WITH
+
+ <!-- | BETWEEN -->
+
 ## Develop:
 
 #### Test
