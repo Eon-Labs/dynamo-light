@@ -156,9 +156,7 @@ await populationTable.query({
 }); // Returns canada population records whose year is larger or equals to 1949
 ```
 
-Available sortKeyOperators:
-
-= | < | <= | > | >= | BEGINS_WITH
+Here is a list of the available [sortKeyOperators](#available-sortkeyoperators).
 
  <!-- | BETWEEN -->
 
@@ -177,7 +175,7 @@ await populationTable.query({
 }); // Returns records whose year is larger or equals to 1949 and alias is "CA"
 ```
 
-#### Available SortKeyOperators:
+### Available SortKeyOperators:
 
 = | < | <= | > | >= | BEGINS_WITH
 
