@@ -164,7 +164,7 @@ Available sortKeyOperators:
 
 ### Tables with indexes:
 
-Assume table `populationTable` has a index `alias-year-index`, whose partitionKey is `alias` and sortKey is `year`:
+Assume table `populationTable` has a global secondary index `alias-year-index`. Its partitionKey is `alias` and sortKey is `year`:
 
 #### Query:
 
