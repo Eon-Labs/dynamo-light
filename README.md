@@ -156,6 +156,12 @@ await populationTable.query({
 }); // Returns canada population records whose year is larger or equals to 1949
 ```
 
+Available sortKeyOperators:
+
+= | < | <= | > | >= | BEGINS_WITH
+
+ <!-- | BETWEEN -->
+
 ### Tables with indexes:
 
 Assume table `populationTable` has a index `alias-year-index`, whose partitionKey is `alias` and sortKey is `year`:
