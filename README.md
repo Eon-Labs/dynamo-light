@@ -182,6 +182,10 @@ await populationTable.query({
  <!-- | BETWEEN -->
 
 ## Develop:
+#### Install dependencies
+```bash
+npm ci
+```
 
 #### Test
 
@@ -201,6 +205,24 @@ In a different tab, you can run tests using
 
 ```
 npm run test
+```
+
+## Publish
+#### update version
+1. Commit to master
+2. Bump up npm version
+    ```
+    # for patch version
+    npm version patch
+    # for minor version
+    npm version minor
+    # for major version
+    npm version major
+    ```
+
+#### publish
+```
+npm publish
 ```
 
 <!-- ## More Examples:

@@ -7,8 +7,11 @@ console.error = jest.fn();
 
 beforeAll(() => {
   const dynamoOptions = {
+    apiVersion: '2012-08-10',
     region: "us-west-2",
-    endpoint: "http://localhost:8000"
+    endpoint: "http://localhost:8000",
+    accessKeyId: "test",
+    secretAccessKey: "test"
   };
   const localDynamodb = new AWS.DynamoDB(dynamoOptions);
   const localClient = new AWS.DynamoDB.DocumentClient(dynamoOptions);
