@@ -206,7 +206,7 @@ In a different tab, you can run tests using
 ```
 npm run test
 ```
-
+<!-- 
 ## Publish
 #### update version
 1. Commit to master
@@ -224,6 +224,7 @@ npm run test
 ```
 npm publish
 ```
+ -->
 
 <!-- ## More Examples:
 
