@@ -1,4 +1,18 @@
+import type { IDLArgumentsBase } from "../types";
+import type { DocumentClient } from "aws-sdk/clients/dynamodb";
+
 import * as api from "../utils/helper";
+
+interface IDLUpdateOptions extends DocumentClient.UpdateItemInput {
+  createIfNotExist?: boolean;
+}
+
+interface IDLUpdate extends IDLArgumentsBase<IDLUpdateOptions> {
+  key: any;
+  newFields: any;
+  forTrx?: boolean;
+  autoTimeStamp?: boolean;
+}
 
 /**
  * Update item in table
@@ -11,11 +25,11 @@ export default async function update({
   options = {},
   verbose = false,
   forTrx = false,
-  autoTimeStamp = false
-}) {
+  autoTimeStamp = false,
+}: IDLUpdate) {
   let params;
   try {
-    const { ReturnValues = "ALL_NEW", createIfNotExist = false } = options as any;
+    const { ReturnValues = "ALL_NEW", createIfNotExist = false } = options;
     // Check for argument errors
     if (!key || typeof key !== "object" || Object.keys(key).length === 0) {
       console.error(`The key you gave was ${key}, which is invalid`);
@@ -38,7 +52,7 @@ export default async function update({
     const ExpressionAttributeValues = api.getExpressionAttributeValues(attributesUsedInExpression);
 
     const dbKeyNames = Object.keys(key);
-    const ConditionExpression = dbKeyNames.map(name => `#${name} = :${name}`).join(" AND ");
+    const ConditionExpression = dbKeyNames.map((name) => `#${name} = :${name}`).join(" AND ");
 
     params = api.mergeOptions(
       {
@@ -48,7 +62,7 @@ export default async function update({
         ExpressionAttributeNames,
         ExpressionAttributeValues,
         ...(!createIfNotExist && { ConditionExpression }),
-        ReturnValues
+        ReturnValues,
       },
       options
     );
@@ -61,7 +75,7 @@ export default async function update({
      */
     if (forTrx) {
       return {
-        Update: params
+        Update: params,
       };
     }
 
@@ -75,7 +89,7 @@ export default async function update({
       console.error(
         `Unable to update in table ${tableName} for the following fields: ${JSON.stringify(rawNewFields)}`,
         JSON.stringify(err),
-        err.stack
+        (err as any).stack
       );
       console.log("Error request params: ", JSON.stringify(params));
     }

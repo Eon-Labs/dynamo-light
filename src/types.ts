@@ -1,3 +1,5 @@
+import type { DynamoDB } from "aws-sdk";
+
 type TableName = string;
 
 type AttributeValue = any;
@@ -40,6 +42,14 @@ interface ExpressionAttributeValueMap {
   [key: string]: AttributeValue;
 }
 type ExpressionAttributeValueVariable = string;
+
+export interface IDLArgumentsBase<TOptionShape> {
+  docClient: DynamoDB.DocumentClient;
+  tableName: string;
+  verbose: boolean;
+  options: Omit<TOptionShape, "TableName" | "Item" | "Key">;
+}
+
 interface FilterConditionMap {
   [key: string]: Condition;
 }
