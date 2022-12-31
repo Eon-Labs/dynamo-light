@@ -1,18 +1,33 @@
+import type { IDLArgumentsBase } from "../types";
+import type { DocumentClient } from "aws-sdk/clients/dynamodb";
+
+interface IDLDelete extends IDLArgumentsBase<DocumentClient.DeleteItemInput> {
+  forTrx: boolean;
+  key: any;
+}
+
 /**
  * Deletes an item from the table
  */
-export default async function deleteItem({ docClient, tableName, key, options = {}, verbose = false, forTrx = false }) {
+export default async function deleteItem({
+  docClient,
+  tableName,
+  key,
+  options = {},
+  verbose = false,
+  forTrx = false,
+}: IDLDelete) {
   let params;
   try {
     if (!key) {
       throw new Error("key is undefined!");
     }
-    const { ReturnValues = "ALL_OLD" } = options as any;
+    const { ReturnValues = "ALL_OLD" } = options;
     params = {
       TableName: tableName,
       Key: key,
       ReturnValues,
-      ...options
+      ...options,
     };
     if (verbose) {
       console.log("params", params);
@@ -23,7 +38,7 @@ export default async function deleteItem({ docClient, tableName, key, options = 
      */
     if (forTrx) {
       return {
-        Delete: params
+        Delete: params,
       };
     }
 
