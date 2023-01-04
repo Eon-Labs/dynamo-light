@@ -1,7 +1,7 @@
-import type { IDLArgumentsBase } from "../types";
-import type { DocumentClient } from "aws-sdk/clients/dynamodb";
+import { PutCommand, PutCommandInput } from "@aws-sdk/lib-dynamodb";
+import { IDLArgumentsBase } from "../types";
 
-interface IDLPut extends IDLArgumentsBase<DocumentClient.PutItemInput> {
+interface IDLPut extends IDLArgumentsBase<PutCommandInput> {
   autoTimeStamp?: boolean;
   forTrx?: boolean;
   item: any;
@@ -17,10 +17,10 @@ export default async function create({
   options = {},
   verbose = false,
   forTrx = false,
-  autoTimeStamp = false,
+  autoTimeStamp = false
 }: IDLPut) {
   const item = {
-    ...rawItem,
+    ...rawItem
   };
   if (autoTimeStamp) {
     const timeStamp = Date.now();
@@ -28,10 +28,10 @@ export default async function create({
     item.updatedAt = timeStamp;
   }
 
-  const params: DocumentClient.PutItemInput = {
+  const params: PutCommandInput = {
     TableName: tableName,
     Item: item,
-    ...options,
+    ...options
   };
   if (verbose) {
     console.log("params", params);
@@ -43,11 +43,11 @@ export default async function create({
      */
     if (forTrx) {
       return {
-        Put: params,
+        Put: params
       };
     }
 
-    await docClient.put(params).promise();
+    await docClient.send(new PutCommand(params));
     if (verbose) {
       console.log(`Successfully inserted item into table ${tableName}`);
     }

@@ -1,8 +1,8 @@
-import type { IDLArgumentsBase } from "../types";
-import type { ComparisonOperator, DocumentClient } from "aws-sdk/clients/dynamodb";
+import { ScanCommand, ScanCommandInput, ScanCommandOutput } from "@aws-sdk/lib-dynamodb";
+import { IDLArgumentsBase } from "../types";
 import { concatBatchFetchResult } from "../utils/helper";
 
-interface IDLScan extends IDLArgumentsBase<DocumentClient.ScanInput> {
+interface IDLScan extends IDLArgumentsBase<ScanCommandInput> {
   pagination: boolean;
   indexName: string;
 }
@@ -18,7 +18,7 @@ export default async function getAll({
   pagination = false,
   verbose = false,
 }: IDLScan) {
-  const params = {
+  const params: ScanCommandInput = {
     TableName: tableName,
     ...(indexName && { IndexName: indexName }),
     ...options,
@@ -27,11 +27,11 @@ export default async function getAll({
     if (verbose) {
       console.log("params", params);
     }
-    let result = { Count: 0 };
+    let result;
     let shouldKeepFetching = true;
     while (!result || shouldKeepFetching) {
       // eslint-disable-next-line no-await-in-loop
-      const fetchedData = await docClient.scan(params).promise();
+      const fetchedData: ScanCommandOutput = await docClient.send(new ScanCommand(params));
       const { LastEvaluatedKey } = fetchedData;
       result = concatBatchFetchResult(result, fetchedData);
       params.ExclusiveStartKey = LastEvaluatedKey;
@@ -48,7 +48,11 @@ export default async function getAll({
     return result;
   } catch (error) {
     if (verbose) {
-      console.error(`Unable to get all items from ${tableName}. Error JSON:`, JSON.stringify(error), (error as { stack: any }).stack);
+      console.error(
+        `Unable to get all items from ${tableName}. Error JSON:`,
+        JSON.stringify(error),
+        (error as { stack: any }).stack
+      );
       console.log("params", JSON.stringify(params));
     }
     throw error;

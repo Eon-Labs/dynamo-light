@@ -1,9 +1,10 @@
-import type { IDLArgumentsBase } from "../types";
-import type { DocumentClient } from "aws-sdk/clients/dynamodb";
+import { UpdateCommand, UpdateCommandInput, UpdateCommandOutput } from "@aws-sdk/lib-dynamodb";
+import { IDLArgumentsBase } from "../types";
 
+import { ResponseMetadata } from "@aws-sdk/types/dist-types/response";
 import * as api from "../utils/helper";
 
-interface IDLUpdateOptions extends DocumentClient.UpdateItemInput {
+interface IDLUpdateOptions extends UpdateCommandInput {
   createIfNotExist?: boolean;
 }
 
@@ -12,6 +13,11 @@ interface IDLUpdate extends IDLArgumentsBase<IDLUpdateOptions> {
   newFields: any;
   forTrx?: boolean;
   autoTimeStamp?: boolean;
+}
+
+export interface IDLUpdateOutput extends Omit<UpdateCommandOutput, "$metadata"> {
+  Update?: UpdateCommandInput; // only when forTrx == true
+  $metadata?: ResponseMetadata;
 }
 
 /**
@@ -25,8 +31,8 @@ export default async function update({
   options = {},
   verbose = false,
   forTrx = false,
-  autoTimeStamp = false,
-}: IDLUpdate) {
+  autoTimeStamp = false
+}: IDLUpdate): Promise<IDLUpdateOutput> {
   let params;
   try {
     const { ReturnValues = "ALL_NEW", createIfNotExist = false } = options;
@@ -52,7 +58,7 @@ export default async function update({
     const ExpressionAttributeValues = api.getExpressionAttributeValues(attributesUsedInExpression);
 
     const dbKeyNames = Object.keys(key);
-    const ConditionExpression = dbKeyNames.map((name) => `#${name} = :${name}`).join(" AND ");
+    const ConditionExpression = dbKeyNames.map(name => `#${name} = :${name}`).join(" AND ");
 
     params = api.mergeOptions(
       {
@@ -62,7 +68,7 @@ export default async function update({
         ExpressionAttributeNames,
         ExpressionAttributeValues,
         ...(!createIfNotExist && { ConditionExpression }),
-        ReturnValues,
+        ReturnValues
       },
       options
     );
@@ -75,11 +81,11 @@ export default async function update({
      */
     if (forTrx) {
       return {
-        Update: params,
+        Update: params
       };
     }
 
-    const data = await docClient.update(params).promise();
+    const data = await docClient.send(new UpdateCommand(params));
     if (verbose) {
       console.log(`Successfully updated item from table ${tableName}`, data);
     }
