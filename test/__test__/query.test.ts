@@ -6,16 +6,18 @@ let tableWithSmallData;
 let tableWithIndexes;
 console.error = jest.fn();
 
+const defaultRegion = "us-west-2";
+const dynamoDBClientConfig: DynamoDBClientConfig = {
+  region: defaultRegion,
+  endpoint: "http://localhost:8000",
+  credentials: {
+    accessKeyId: "test",
+    secretAccessKey: "test"
+  }
+};
+
 beforeAll(() => {
-  const dynamoOptions: DynamoDBClientConfig = {
-    region: "us-west-2",
-    endpoint: "http://localhost:8000",
-    credentials: {
-      accessKeyId: "test",
-      secretAccessKey: "test",
-    },
-  };
-  const localDbClient = new DynamoDBClient(dynamoOptions);
+  const localDbClient = new DynamoDBClient(dynamoDBClientConfig);
   const localDocClient = DynamoDBDocumentClient.from(localDbClient);
 
   Table.replaceDynamoClient(localDbClient, localDocClient);
@@ -64,6 +66,32 @@ test("Query table in index with partitionKey, sortKey and sortKeyOperator", asyn
     createdAt: 1504293566,
   });
   expect(result.Items.length > 1).toBe(true);
+});
+
+test("Query table with default region", async () => {
+  const docClient = tableWithSmallData.docClient;
+  const spyDocClientCallDynamoDb = jest.spyOn(docClient, "send");
+
+  await tableWithSmallData.query({ partitionKeyValue: "20170624201449_966_15142029630_601" });
+
+  expect(spyDocClientCallDynamoDb).toHaveBeenCalledTimes(1);
+  await expect(docClient.config.region()).resolves.toBe(defaultRegion);
+});
+
+test("Query table with override region", async () => {
+  const anotherRegion = "ap-northeast-1";
+  const tableWithAnotherRegion = new Table("Clevo-Processed-Speech-Table", {
+    ...dynamoDBClientConfig,
+    region: anotherRegion
+  });
+  const docClient = tableWithAnotherRegion.docClient;
+  const spyDocClientCallDynamoDb = jest.spyOn(docClient, "send");
+
+  await tableWithAnotherRegion.query({ partitionKeyValue: "20170624201449_966_15142029630_601" });
+
+  expect(spyDocClientCallDynamoDb).toHaveBeenCalledTimes(1);
+  await expect(docClient.config.region()).resolves.not.toBe(defaultRegion);
+  await expect(docClient.config.region()).resolves.toBe(anotherRegion);
 });
 
 // TODO: add pagination

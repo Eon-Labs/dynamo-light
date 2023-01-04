@@ -6,16 +6,18 @@ let tableWithSmallData;
 let tableWithMediumData;
 console.error = jest.fn();
 
+const defaultRegion = "us-west-2";
+const dynamoDBClientConfig: DynamoDBClientConfig = {
+  region: defaultRegion,
+  endpoint: "http://localhost:8000",
+  credentials: {
+    accessKeyId: "test",
+    secretAccessKey: "test"
+  }
+};
+
 beforeAll(() => {
-  const dynamoOptions: DynamoDBClientConfig = {
-    region: "us-west-2",
-    endpoint: "http://localhost:8000",
-    credentials: {
-      accessKeyId: "test",
-      secretAccessKey: "test",
-    },
-  };
-  const localDbClient = new DynamoDBClient(dynamoOptions);
+  const localDbClient = new DynamoDBClient(dynamoDBClientConfig);
   const localDocClient = DynamoDBDocumentClient.from(localDbClient);
 
   Table.replaceDynamoClient(localDbClient, localDocClient);
@@ -50,10 +52,36 @@ test("scan with options: AttributesToGet and Limit", async () => {
   const options = {
     AttributesToGet: ["fileExtension", "transcribedAt"],
     Select: "SPECIFIC_ATTRIBUTES",
-    Limit: 5,
+    Limit: 5
   };
   const { Items: fetchedItems } = await tableWithMediumData.scan({}, options);
   expect(fetchedItems!.length).toBe(options.Limit);
   expect(fetchedItems![0][options.AttributesToGet[0]]).toBeDefined();
   expect(fetchedItems![0].organizationName).not.toBeDefined();
+});
+
+test("scan with default region", async () => {
+  const docClient = tableWithSmallData.docClient;
+  const spyDocClientCallDynamoDb = jest.spyOn(docClient, "send");
+
+  await tableWithSmallData.scan();
+
+  expect(spyDocClientCallDynamoDb).toHaveBeenCalledTimes(1);
+  await expect(docClient.config.region()).resolves.toBe(defaultRegion);
+});
+
+test("scan with override region", async () => {
+  const anotherRegion = "ap-northeast-1";
+  const tableWithAnotherRegion = new Table("Clevo-Processed-Speech-Table", {
+    ...dynamoDBClientConfig,
+    region: anotherRegion
+  });
+  const docClient = tableWithAnotherRegion.docClient;
+  const spyDocClientCallDynamoDb = jest.spyOn(docClient, "send");
+
+  await tableWithAnotherRegion.scan();
+
+  expect(spyDocClientCallDynamoDb).toHaveBeenCalledTimes(1);
+  await expect(tableWithAnotherRegion.docClient.config.region()).resolves.not.toBe(defaultRegion);
+  await expect(tableWithAnotherRegion.docClient.config.region()).resolves.toBe(anotherRegion);
 });

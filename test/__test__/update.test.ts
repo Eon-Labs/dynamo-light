@@ -11,16 +11,18 @@ const simpleKey = { fileName: simpleKeyStr };
 const nonExistKey = { fileName: "not exist for update" };
 const composedKey = { categoryName: "查询扣款", fileNameBeginTime: "20170623160058_966_13436475398_601.wav-4330" };
 
+const defaultRegion = "us-west-2";
+const dynamoDBClientConfig: DynamoDBClientConfig = {
+  region: defaultRegion,
+  endpoint: "http://localhost:8000",
+  credentials: {
+    accessKeyId: "test",
+    secretAccessKey: "test"
+  }
+};
+
 beforeAll(() => {
-  const dynamoOptions = {
-    region: "us-west-2",
-    endpoint: "http://localhost:8000",
-    credentials: {
-      accessKeyId: "test",
-      secretAccessKey: "test",
-    },
-  };
-  const localDbClient = new DynamoDBClient(dynamoOptions);
+  const localDbClient = new DynamoDBClient(dynamoDBClientConfig);
   const localDocClient = DynamoDBDocumentClient.from(localDbClient);
 
   Table.replaceDynamoClient(localDbClient, localDocClient);
@@ -191,4 +193,27 @@ test("if condtion expression is not met, throw condtion exception error", async 
     expect(e.$response.statusCode).toBe(400);
     expect(e.message).toMatch("The conditional request failed");
   }
+});
+
+test("update table with default region", async () => {
+  const docClient = tableWithPrimaryKey.docClient;
+  const spyDocClientCallDynamoDb = jest.spyOn(docClient, "send");
+
+  await tableWithPrimaryKey.update(simpleKeyStr, { organizationName: "Test group" });
+
+  expect(spyDocClientCallDynamoDb).toHaveBeenCalledTimes(1);
+  await expect(docClient.config.region()).resolves.toBe(defaultRegion);
+});
+
+test("update table with override region", async () => {
+  const anotherRegion = "ap-northeast-1";
+  const tableWithAnotherRegion = new Table("Clevo-Processed-Speech-Table", { ...dynamoDBClientConfig, region: anotherRegion });
+  const docClient = tableWithAnotherRegion.docClient;
+  const spyDocClientCallDynamoDb = jest.spyOn(docClient, "send");
+
+  await tableWithAnotherRegion.update(simpleKeyStr, { organizationName: "Test group" });
+
+  expect(spyDocClientCallDynamoDb).toHaveBeenCalledTimes(1);
+  await expect(docClient.config.region()).resolves.not.toBe(defaultRegion);
+  await expect(docClient.config.region()).resolves.toBe(anotherRegion);
 });

@@ -15,16 +15,19 @@ const existingItem = {
   somethingElse: "this is an existing item from create test",
 };
 
+const defaultRegion = "us-west-2";
+const dynamoDBClientConfig: DynamoDBClientConfig = {
+  region: defaultRegion,
+  endpoint: "http://localhost:8000",
+  credentials: {
+    accessKeyId: "test",
+    secretAccessKey: "test",
+  },
+};
+
+
 beforeAll(() => {
-  const dynamoOptions: DynamoDBClientConfig = {
-    region: "us-west-2",
-    endpoint: "http://localhost:8000",
-    credentials: {
-      accessKeyId: "test",
-      secretAccessKey: "test",
-    },
-  };
-  const localDbClient = new DynamoDBClient(dynamoOptions);
+  const localDbClient = new DynamoDBClient(dynamoDBClientConfig);
   const localDocClient = DynamoDBDocumentClient.from(localDbClient);
 
   Table.replaceDynamoClient(localDbClient, localDocClient);
@@ -73,4 +76,27 @@ test("put an item with options", async () => {
   // expect(result1.Item).not.toBeUndefined();
   // expect(result2.Item).not.toBeUndefined();
   // expect(JSON.stringify(result1)).toBe(JSON.stringify(result2));
+});
+
+test("put with default region", async () => {
+  const docClient = tableWithPrimaryKey.docClient;
+  const spyDocClientCallDynamoDb = jest.spyOn(docClient, "send");
+
+  await tableWithPrimaryKey.put(simpleItem);
+
+  expect(spyDocClientCallDynamoDb).toHaveBeenCalledTimes(1);
+  await expect(docClient.config.region()).resolves.toBe(defaultRegion);
+});
+
+test("put with override region", async () => {
+  const anotherRegion = "ap-northeast-1";
+  const tableWithAnotherRegion = new Table("Clevo-Processed-Speech-Table", { ...dynamoDBClientConfig, region: anotherRegion });
+  const docClient = tableWithAnotherRegion.docClient;
+  const spyDocClientCallDynamoDb = jest.spyOn(docClient, "send");
+
+  await tableWithAnotherRegion.put(simpleItem);
+
+  expect(spyDocClientCallDynamoDb).toHaveBeenCalledTimes(1);
+  await expect(docClient.config.region()).resolves.not.toBe(defaultRegion);
+  await expect(docClient.config.region()).resolves.toBe(anotherRegion);
 });

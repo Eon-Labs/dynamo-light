@@ -10,16 +10,18 @@ const simpleKeyStr = "20170628135402_966_15940025466_601";
 const simpleKey = { fileName: simpleKeyStr };
 const nonExistingKey = { fileName: "abcd1234" };
 
+const defaultRegion = "us-west-2";
+const dynamoDBClientConfig: DynamoDBClientConfig = {
+  region: defaultRegion,
+  endpoint: "http://localhost:8000",
+  credentials: {
+    accessKeyId: "test",
+    secretAccessKey: "test"
+  }
+};
+
 beforeAll(() => {
-  const dynamoOptions: DynamoDBClientConfig = {
-    region: "us-west-2",
-    endpoint: "http://localhost:8000",
-    credentials: {
-      accessKeyId: "test",
-      secretAccessKey: "test",
-    },
-  };
-  const localDbClient = new DynamoDBClient(dynamoOptions);
+  const localDbClient = new DynamoDBClient(dynamoDBClientConfig);
   const localDocClient = DynamoDBDocumentClient.from(localDbClient);
 
   Table.replaceDynamoClient(localDbClient, localDocClient);
@@ -68,4 +70,38 @@ test("delete an item with options", async () => {
   // } catch (error) {
   //   expect(error).not.toBeUndefined();
   // }
+});
+
+test("delete with default region", async () => {
+  const docClient = tableWithPrimaryKey.docClient;
+  const spyDocClientCallDynamoDb = jest.spyOn(docClient, "send");
+
+  try {
+    await tableWithPrimaryKey.delete("non-exist-key");
+  } catch (error) {
+    console.log("error is expected for non-exist-key");
+  } finally {
+    expect(spyDocClientCallDynamoDb).toHaveBeenCalledTimes(1);
+    await expect(docClient.config.region()).resolves.toBe(defaultRegion);
+  }
+});
+
+test("delete with override region", async () => {
+  const anotherRegion = "ap-northeast-1";
+  const tableWithAnotherRegion = new Table("Clevo-Processed-Speech-Table", {
+    ...dynamoDBClientConfig,
+    region: anotherRegion
+  });
+  const docClient = tableWithAnotherRegion.docClient;
+  const spyDocClientCallDynamoDb = jest.spyOn(docClient, "send");
+
+  try {
+    await tableWithAnotherRegion.delete("non-exist-key");
+  } catch (error) {
+    console.log("error is expected for non-exist-key");
+  } finally {
+    expect(spyDocClientCallDynamoDb).toHaveBeenCalledTimes(1);
+    await expect(docClient.config.region()).resolves.not.toBe(defaultRegion);
+    await expect(docClient.config.region()).resolves.toBe(anotherRegion);
+  }
 });
