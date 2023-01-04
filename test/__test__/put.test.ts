@@ -61,7 +61,7 @@ test("put an item with invalid params will be caught", async () => {
   expect.assertions(2);
   try {
     await tableWithPrimaryKey.put({ fakeKey: "wrong name for hashKey" });
-  } catch (e) {
+  } catch (e: any) {
     expect(e).not.toBeUndefined();
     expect(e.message).toMatch("One of the required keys was not given a value");
   }

@@ -52,7 +52,7 @@ test("update a non-existing item", async () => {
   try {
     expect.assertions(1);
     await tableWithPrimaryKey.update("non-exist-key", { nonExistingField: "This is new!" });
-  } catch (error) {
+  } catch (error: any) {
     expect(error.name).toBe("ConditionalCheckFailedException");
   }
 });
@@ -159,7 +159,7 @@ test("entering an invalid key with option createIfNotExist set to default(false)
       address: "2456",
     };
     await tableWithPrimaryKey.update(anotherNonExistKey, newFields);
-  } catch (e) {
+  } catch (e: any) {
     expect(e.name).toBe("ConditionalCheckFailedException");
     expect(e.message).toMatch("The conditional request failed");
   }
@@ -187,7 +187,7 @@ test("if condtion expression is not met, throw condtion exception error", async 
       ConditionExpression: "attribute_not_exists(operatorId)",
     };
     await tableWithSortKey.update(composedKey, newFields, options);
-  } catch (e) {
+  } catch (e: any) {
     expect(e.$response.statusCode).toBe(400);
     expect(e.message).toMatch("The conditional request failed");
   }

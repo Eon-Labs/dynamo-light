@@ -75,7 +75,7 @@ test(`get item with invalid key should return error`, async () => {
   expect.assertions(1);
   try {
     await tableWithPrimaryKey.get(key);
-  } catch (e) {
+  } catch (e: any) {
     expect(e.message).toBe(`Invalid Key: ${JSON.stringify(key)}`);
   }
 });

@@ -61,7 +61,6 @@ export class Table {
   }
 
   public async initTable(): Promise<void> {
-    // const tableInfo: any = await dynamodb.describeTable({ TableName: this.tableName }).promise();
     const tableInfo: DescribeTableCommandOutput = await this.dbClient.send(
       new DescribeTableCommand({
         TableName: this.tableName
