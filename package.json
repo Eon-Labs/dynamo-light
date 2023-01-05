@@ -20,7 +20,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ChenLi0830/dynamoLight"
+    "url": "https://github.com/Eon-Labs/dynamo-light"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.241.0",
@@ -51,6 +51,6 @@
   "files": [
     "lib/**/*"
   ],
-  "author": "Chen Li",
+  "author": "EonLabs Team",
   "license": "ISC"
 }
