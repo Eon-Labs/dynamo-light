@@ -1,14 +1,14 @@
-import type { IDLArgumentsBase } from "../types";
-import type { DocumentClient } from "aws-sdk/clients/dynamodb";
+import { TransactWriteCommand, TransactWriteCommandInput, TransactWriteCommandOutput } from "@aws-sdk/lib-dynamodb";
+import { IDLArgumentsBase } from "../types";
 
-type IDLTrxWriteOptionBase = Omit<DocumentClient.TransactWriteItemsInput, "TransactItems">;
+type IDLTrxWriteOptionBase = Omit<TransactWriteCommandInput, "TransactItems">;
 
 interface IDLTrxWriteOptions extends IDLTrxWriteOptionBase {
   verbose?: boolean;
 }
 
 interface IDLTrxWrite extends IDLArgumentsBase<IDLTrxWriteOptions> {
-  transactions: DocumentClient.TransactWriteItemList;
+  transactions: TransactWriteCommandInput["TransactItems"];
 }
 
 /**
@@ -18,19 +18,19 @@ export default async function transactWrite({
   docClient,
   transactions,
   options,
-  verbose = false,
+  verbose = false
 }: Omit<IDLTrxWrite, "tableName">) {
   const { ClientRequestToken, ReturnConsumedCapacity = "TOTAL", ReturnItemCollectionMetrics = "NONE" } = options;
 
-  const params: DocumentClient.TransactWriteItemsInput = {
+  const params: TransactWriteCommandInput = {
     TransactItems: transactions,
     ...(ClientRequestToken && { ClientRequestToken }),
     ...(ReturnConsumedCapacity && { ReturnConsumedCapacity }),
-    ...(ReturnItemCollectionMetrics && { ReturnItemCollectionMetrics }),
+    ...(ReturnItemCollectionMetrics && { ReturnItemCollectionMetrics })
   };
 
   try {
-    const data = await docClient.transactWrite(params).promise();
+    const data: TransactWriteCommandOutput = await docClient.send(new TransactWriteCommand(params));
     if (verbose) {
       console.log(`Successfully performed transactionWrite`, data);
     }

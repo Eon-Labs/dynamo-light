@@ -1,4 +1,11 @@
-import * as AWS from "aws-sdk";
+import {
+  DescribeTableCommand,
+  DescribeTableCommandOutput,
+  DynamoDBClient,
+  DynamoDBClientConfig,
+  KeySchemaElement
+} from "@aws-sdk/client-dynamodb";
+import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import deleteItem from "./CRUD/delete";
 import getItem from "./CRUD/get";
 import createItem from "./CRUD/put";
@@ -8,8 +15,10 @@ import transactWrite from "./CRUD/transactWrite";
 import updateItem from "./CRUD/update";
 import { DeleteItemInput, GetItemInput, PutItemInput, QueryInput, ScanInput, UpdateItemInput } from "./types";
 
-let dynamodb = new AWS.DynamoDB();
-let docClient = new AWS.DynamoDB.DocumentClient();
+// Bare-bones DynamoDB Client are more modular and reduces bundle size and improve loading performance over full client "new DynamoDB({});"
+// Avoid using the full client because it may be dropped in the next major version.
+let dbClient = new DynamoDBClient({});
+let docClient = DynamoDBDocumentClient.from(dbClient);
 
 interface IIndex {
   name: string;
@@ -20,36 +29,48 @@ interface IIndex {
 export class Table {
   public static transactWrite(transactions: any, options = { verbose: false }) {
     const { verbose } = options;
-    delete options.verbose;
     return transactWrite({ docClient, transactions, options, verbose });
   }
 
-  public static replaceDynamoClient(newDynamodb, newClient) {
-    dynamodb = newDynamodb;
-    docClient = newClient;
+  public static replaceDynamoClient(newDbClient: DynamoDBClient, newDocClient: DynamoDBDocumentClient) {
+    dbClient = newDbClient;
+    docClient = newDocClient;
   }
 
   public tableName: string;
   public partitionKey: string | undefined;
   public sortKey: string | undefined;
   public indexMap: Map<string, IIndex>;
+  public dbClient: DynamoDBClient;
+  public docClient: DynamoDBDocumentClient;
   private initialized: boolean;
 
-  constructor(name: string) {
+  constructor(name: string, config?: DynamoDBClientConfig) {
     this.tableName = name;
     this.initialized = false;
     this.partitionKey = undefined;
     this.sortKey = undefined;
     this.indexMap = new Map();
+    if (config) {
+      this.dbClient = new DynamoDBClient(config);
+      this.docClient = DynamoDBDocumentClient.from(this.dbClient);
+    } else {
+      this.dbClient = dbClient;
+      this.docClient = docClient;
+    }
   }
 
-  public async initTable() {
-    const tableInfo: any = await dynamodb.describeTable({ TableName: this.tableName }).promise();
+  public async initTable(): Promise<void> {
+    const tableInfo: DescribeTableCommandOutput = await this.dbClient.send(
+      new DescribeTableCommand({
+        TableName: this.tableName
+      })
+    );
     this.initialized = true;
     /**
      * Set partitionKey and sortKey
      */
-    const { KeySchema, GlobalSecondaryIndexes = [] } = tableInfo.Table;
+    const { KeySchema = [], GlobalSecondaryIndexes = [] } = tableInfo.Table!;
     const { partitionKey, sortKey } = this.retrieveKeys(KeySchema);
     this.partitionKey = partitionKey;
     this.sortKey = sortKey;
@@ -58,13 +79,13 @@ export class Table {
      * Set indexes
      */
     for (const indexRecord of GlobalSecondaryIndexes) {
-      const { partitionKey: indexPartitionKey, sortKey: indexSortKey } = this.retrieveKeys(indexRecord.KeySchema);
+      const { partitionKey: indexPartitionKey, sortKey: indexSortKey } = this.retrieveKeys(indexRecord.KeySchema!);
       const index: IIndex = {
-        name: indexRecord.IndexName,
-        partitionKey: indexPartitionKey as string,
+        name: indexRecord.IndexName!,
+        partitionKey: indexPartitionKey,
         sortKey: indexSortKey
       };
-      this.indexMap.set(indexRecord.IndexName, index);
+      this.indexMap.set(indexRecord.IndexName!, index);
     }
   }
 
@@ -107,7 +128,7 @@ export class Table {
 
     const { verbose, forTrx } = this.retrieveAndDeleteDLOptions(options);
 
-    return getItem({ docClient, tableName: this.tableName, key, options, verbose, forTrx });
+    return getItem({ docClient: this.docClient, tableName: this.tableName, key, options, verbose, forTrx });
   }
 
   public async put(item: any, options: PutItemInput = {}) {
@@ -116,7 +137,15 @@ export class Table {
     }
     const { verbose, forTrx, autoTimeStamp } = this.retrieveAndDeleteDLOptions(options);
 
-    return createItem({ docClient, tableName: this.tableName, item, options, verbose, forTrx, autoTimeStamp });
+    return createItem({
+      docClient: this.docClient,
+      tableName: this.tableName,
+      item,
+      options,
+      verbose,
+      forTrx,
+      autoTimeStamp
+    });
   }
 
   public async delete(key: any, options: DeleteItemInput = {}) {
@@ -134,7 +163,7 @@ export class Table {
 
     const { verbose, forTrx } = this.retrieveAndDeleteDLOptions(options);
 
-    return deleteItem({ docClient, tableName: this.tableName, key, options, verbose, forTrx });
+    return deleteItem({ docClient: this.docClient, tableName: this.tableName, key, options, verbose, forTrx });
   }
 
   public async update(key: any, newFields: any, options: UpdateItemInput = {}) {
@@ -153,7 +182,7 @@ export class Table {
     const { verbose, forTrx, autoTimeStamp } = this.retrieveAndDeleteDLOptions(options);
 
     return updateItem({
-      docClient,
+      docClient: this.docClient,
       key,
       tableName: this.tableName,
       newFields,
@@ -220,7 +249,7 @@ export class Table {
     const { verbose, pagination } = this.retrieveAndDeleteDLOptions(options);
 
     return queryItems({
-      docClient,
+      docClient: this.docClient,
       tableName: this.tableName,
       indexName,
       partitionKey,
@@ -243,7 +272,7 @@ export class Table {
     const { verbose, pagination } = this.retrieveAndDeleteDLOptions(options);
 
     return getAllItems({
-      docClient,
+      docClient: this.docClient,
       tableName: this.tableName,
       indexName,
       options,
@@ -252,7 +281,7 @@ export class Table {
     });
   }
 
-  private retrieveKeys(KeySchema: any) {
+  private retrieveKeys(KeySchema: KeySchemaElement[]): { partitionKey: string; sortKey: string | undefined } {
     let partitionKey: string | undefined;
     let sortKey: string | undefined;
     for (const { AttributeName, KeyType } of KeySchema) {
@@ -262,6 +291,9 @@ export class Table {
       if (KeyType === "RANGE") {
         sortKey = AttributeName;
       }
+    }
+    if (partitionKey === undefined) {
+      throw new Error(`Table ${this.tableName} partitionKey is undefined!`);
     }
     return { partitionKey, sortKey };
   }

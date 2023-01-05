@@ -1,9 +1,15 @@
-import type { IDLArgumentsBase } from "../types";
-import type { DocumentClient } from "aws-sdk/clients/dynamodb";
+import { GetCommand, GetCommandInput, GetCommandOutput } from "@aws-sdk/lib-dynamodb";
+import { ResponseMetadata } from "@aws-sdk/types/dist-types/response";
+import { IDLArgumentsBase } from "../types";
 
-interface IDLGet extends IDLArgumentsBase<DocumentClient.GetItemInput> {
+interface IDLGet extends IDLArgumentsBase<GetCommandInput> {
   key: any;
   forTrx: boolean;
+}
+
+export interface IDLGetOutput extends Omit<GetCommandOutput, "$metadata"> {
+  Get?: GetCommandInput; // only when forTrx == true
+  $metadata?: ResponseMetadata;
 }
 
 /**
@@ -15,8 +21,8 @@ export default async function get({
   key,
   options = {},
   verbose = false,
-  forTrx = false,
-}: IDLGet) {
+  forTrx = false
+}: IDLGet): Promise<IDLGetOutput> {
   /**
    * Param verification
    */
@@ -26,10 +32,10 @@ export default async function get({
   /**
    * Construct database request
    */
-  const params: DocumentClient.GetItemInput = {
+  const params: GetCommandInput = {
     TableName: tableName,
     Key: key,
-    ...options,
+    ...options
   };
   if (verbose) {
     console.log("params", params);
@@ -41,11 +47,11 @@ export default async function get({
      */
     if (forTrx) {
       return {
-        Get: params,
+        Get: params
       };
     }
 
-    const data = await docClient.get(params).promise();
+    const data: GetCommandOutput = await docClient.send(new GetCommand(params));
     if (verbose) {
       console.log(`Successfully got item from table ${tableName}`, data);
     }

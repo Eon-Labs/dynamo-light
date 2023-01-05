@@ -1,7 +1,7 @@
-import type { IDLArgumentsBase } from "../types";
-import type { DocumentClient } from "aws-sdk/clients/dynamodb";
+import { DeleteCommand, DeleteCommandInput, DeleteCommandOutput } from "@aws-sdk/lib-dynamodb";
+import { IDLArgumentsBase } from "../types";
 
-interface IDLDelete extends IDLArgumentsBase<DocumentClient.DeleteItemInput> {
+interface IDLDelete extends IDLArgumentsBase<DeleteCommandInput> {
   forTrx: boolean;
   key: any;
 }
@@ -15,7 +15,7 @@ export default async function deleteItem({
   key,
   options = {},
   verbose = false,
-  forTrx = false,
+  forTrx = false
 }: IDLDelete) {
   let params;
   try {
@@ -27,7 +27,7 @@ export default async function deleteItem({
       TableName: tableName,
       Key: key,
       ReturnValues,
-      ...options,
+      ...options
     };
     if (verbose) {
       console.log("params", params);
@@ -38,11 +38,11 @@ export default async function deleteItem({
      */
     if (forTrx) {
       return {
-        Delete: params,
+        Delete: params
       };
     }
 
-    const data = await docClient.delete(params).promise();
+    const data: DeleteCommandOutput = await docClient.send(new DeleteCommand(params));
     if (!data.Attributes) {
       throw new Error(`Key ${JSON.stringify(key)} already does not exist, try again.`);
     } else {

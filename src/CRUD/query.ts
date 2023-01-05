@@ -1,14 +1,14 @@
+import { QueryCommand, QueryCommandInput, QueryCommandOutput } from "@aws-sdk/lib-dynamodb";
+import { IDLArgumentsBase } from "../types";
 import { buildKeyConditionExpressions, concatBatchFetchResult, mergeOptions } from "../utils/helper";
-import type { IDLArgumentsBase } from "../types";
-import type { ComparisonOperator, DocumentClient } from "aws-sdk/clients/dynamodb";
 
-interface IDLQuery extends IDLArgumentsBase<DocumentClient.QueryInput> {
+interface IDLQuery extends IDLArgumentsBase<QueryCommandInput> {
   indexName: string | undefined;
   pagination: boolean;
   partitionKey: any;
   partitionKeyValue: any;
   sortKey: any;
-  sortKeyOperator: ComparisonOperator | undefined;
+  sortKeyOperator: string | undefined;
   sortKeyValue: any;
 }
 
@@ -50,7 +50,7 @@ export default async function query({
     sortKeyValue,
   });
 
-  const params: DocumentClient.QueryInput = mergeOptions(
+  const params: QueryCommandInput = mergeOptions(
     {
       TableName: tableName,
       ...(indexName && { IndexName: indexName }),
@@ -70,7 +70,7 @@ export default async function query({
     let shouldKeepFetching = false;
     while (!result || shouldKeepFetching) {
       // eslint-disable-next-line no-await-in-loop
-      const fetchedData = await docClient.query(params).promise();
+      const fetchedData: QueryCommandOutput = await docClient.send(new QueryCommand(params));
       const { LastEvaluatedKey } = fetchedData;
       result = concatBatchFetchResult(result, fetchedData);
       params.ExclusiveStartKey = LastEvaluatedKey;

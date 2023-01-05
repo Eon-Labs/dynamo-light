@@ -8,3 +8,4 @@ lib
 # Serverless directories
 .serverless
 test/local-dynamo/.dynamodb
+.idea

@@ -1,4 +1,4 @@
-import type { DynamoDB } from "aws-sdk";
+import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 
 type TableName = string;
 
@@ -44,7 +44,7 @@ interface ExpressionAttributeValueMap {
 type ExpressionAttributeValueVariable = string;
 
 export interface IDLArgumentsBase<TOptionShape> {
-  docClient: DynamoDB.DocumentClient;
+  docClient: DynamoDBDocumentClient;
   tableName: string;
   verbose: boolean;
   options: Omit<TOptionShape, "TableName" | "Item" | "Key">;
@@ -166,7 +166,7 @@ export interface GetItemInput {
    */
   verbose?: boolean;
   /**
-   * Whether this operation is used in an transaction
+   * Whether this operation is used in a transaction
    */
   forTrx?: boolean;
   /**
