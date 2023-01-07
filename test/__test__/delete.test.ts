@@ -13,7 +13,7 @@ const nonExistingKey = { fileName: "abcd1234" };
 const defaultRegion = "us-west-2";
 const dynamoDBClientConfig: DynamoDBClientConfig = {
   region: defaultRegion,
-  endpoint: "http://localhost:8000",
+  endpoint: process.env.MOCK_DYNAMODB_ENDPOINT,
   credentials: {
     accessKeyId: "test",
     secretAccessKey: "test"

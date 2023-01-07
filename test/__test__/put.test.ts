@@ -18,7 +18,7 @@ const existingItem = {
 const defaultRegion = "us-west-2";
 const dynamoDBClientConfig: DynamoDBClientConfig = {
   region: defaultRegion,
-  endpoint: "http://localhost:8000",
+  endpoint: process.env.MOCK_DYNAMODB_ENDPOINT,
   credentials: {
     accessKeyId: "test",
     secretAccessKey: "test",
@@ -66,7 +66,7 @@ test("put an item with invalid params will be caught", async () => {
     await tableWithPrimaryKey.put({ fakeKey: "wrong name for hashKey" });
   } catch (e: any) {
     expect(e).not.toBeUndefined();
-    expect(e.message).toMatch("One of the required keys was not given a value");
+    expect(e.message).toMatch("One or more parameter values were invalid: Missing the key fileName in the item");
   }
 });
 
