@@ -1,4 +1,5 @@
 {
+  "preset": "jest-dynalite",
   "roots": ["<rootDir>/test"],
   "transform": {
     "^.+\\.(t|j)sx?$": "ts-jest"
