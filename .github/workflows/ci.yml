@@ -25,3 +25,5 @@ jobs:
       name: "Install NPM dependencies"
     - run: npm run prepublishOnly
       name: "Run tests and lints"
+    - run: prettier --check "src/**/*.ts"
+      name: "Run style checks"
