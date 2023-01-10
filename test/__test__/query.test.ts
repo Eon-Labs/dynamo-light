@@ -12,8 +12,8 @@ const dynamoDBClientConfig: DynamoDBClientConfig = {
   endpoint: process.env.MOCK_DYNAMODB_ENDPOINT,
   credentials: {
     accessKeyId: "test",
-    secretAccessKey: "test"
-  }
+    secretAccessKey: "test",
+  },
 };
 
 beforeAll(() => {
@@ -82,7 +82,7 @@ test("Query table with override region", async () => {
   const anotherRegion = "ap-northeast-1";
   const tableWithAnotherRegion = new Table("Clevo-Processed-Speech-Table", {
     ...dynamoDBClientConfig,
-    region: anotherRegion
+    region: anotherRegion,
   });
   const docClient = tableWithAnotherRegion.docClient;
   const spyDocClientCallDynamoDb = jest.spyOn(docClient, "send");

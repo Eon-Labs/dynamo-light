@@ -3,7 +3,7 @@ import {
   DescribeTableCommandOutput,
   DynamoDBClient,
   DynamoDBClientConfig,
-  KeySchemaElement
+  KeySchemaElement,
 } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import deleteItem from "./CRUD/delete";
@@ -63,7 +63,7 @@ export class Table {
   public async initTable(): Promise<void> {
     const tableInfo: DescribeTableCommandOutput = await this.dbClient.send(
       new DescribeTableCommand({
-        TableName: this.tableName
+        TableName: this.tableName,
       })
     );
     this.initialized = true;
@@ -83,7 +83,7 @@ export class Table {
       const index: IIndex = {
         name: indexRecord.IndexName!,
         partitionKey: indexPartitionKey,
-        sortKey: indexSortKey
+        sortKey: indexSortKey,
       };
       this.indexMap.set(indexRecord.IndexName!, index);
     }
@@ -144,7 +144,7 @@ export class Table {
       options,
       verbose,
       forTrx,
-      autoTimeStamp
+      autoTimeStamp,
     });
   }
 
@@ -189,7 +189,7 @@ export class Table {
       options,
       verbose,
       forTrx,
-      autoTimeStamp
+      autoTimeStamp,
     });
   }
 
@@ -259,7 +259,7 @@ export class Table {
       sortKeyValue,
       options,
       pagination,
-      verbose
+      verbose,
     });
   }
 
@@ -277,7 +277,7 @@ export class Table {
       indexName,
       options,
       pagination,
-      verbose
+      verbose,
     });
   }
 
@@ -300,7 +300,7 @@ export class Table {
 
   private parsePartitionKey(partitionKeyValue: string): object {
     return {
-      [this.partitionKey as string]: partitionKeyValue
+      [this.partitionKey as string]: partitionKeyValue,
     };
   }
 
@@ -319,7 +319,7 @@ export class Table {
       verbose,
       forTrx,
       autoTimeStamp,
-      pagination
+      pagination,
     };
   }
 }

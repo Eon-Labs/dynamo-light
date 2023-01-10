@@ -25,7 +25,6 @@ const dynamoDBClientConfig: DynamoDBClientConfig = {
   },
 };
 
-
 beforeAll(() => {
   const localDbClient = new DynamoDBClient(dynamoDBClientConfig);
   const localDocClient = DynamoDBDocumentClient.from(localDbClient);
@@ -90,7 +89,10 @@ test("put with default region", async () => {
 
 test("put with override region", async () => {
   const anotherRegion = "ap-northeast-1";
-  const tableWithAnotherRegion = new Table("Clevo-Processed-Speech-Table", { ...dynamoDBClientConfig, region: anotherRegion });
+  const tableWithAnotherRegion = new Table("Clevo-Processed-Speech-Table", {
+    ...dynamoDBClientConfig,
+    region: anotherRegion,
+  });
   const docClient = tableWithAnotherRegion.docClient;
   const spyDocClientCallDynamoDb = jest.spyOn(docClient, "send");
 

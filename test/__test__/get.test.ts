@@ -94,7 +94,10 @@ test("Get item with default region", async () => {
 
 test("Get item with override region", async () => {
   const anotherRegion = "ap-northeast-1";
-  const tableWithAnotherRegion = new Table("Clevo-Processed-Speech-Table", {...dynamoDBClientConfig, region: anotherRegion});
+  const tableWithAnotherRegion = new Table("Clevo-Processed-Speech-Table", {
+    ...dynamoDBClientConfig,
+    region: anotherRegion,
+  });
   const docClient = tableWithAnotherRegion.docClient;
   const spyDocClientCallDynamoDb = jest.spyOn(docClient, "send");
 

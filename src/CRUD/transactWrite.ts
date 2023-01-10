@@ -18,7 +18,7 @@ export default async function transactWrite({
   docClient,
   transactions,
   options,
-  verbose = false
+  verbose = false,
 }: Omit<IDLTrxWrite, "tableName">) {
   const { ClientRequestToken, ReturnConsumedCapacity = "TOTAL", ReturnItemCollectionMetrics = "NONE" } = options;
 
@@ -26,7 +26,7 @@ export default async function transactWrite({
     TransactItems: transactions,
     ...(ClientRequestToken && { ClientRequestToken }),
     ...(ReturnConsumedCapacity && { ReturnConsumedCapacity }),
-    ...(ReturnItemCollectionMetrics && { ReturnItemCollectionMetrics })
+    ...(ReturnItemCollectionMetrics && { ReturnItemCollectionMetrics }),
   };
 
   try {

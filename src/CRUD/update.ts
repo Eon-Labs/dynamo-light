@@ -31,7 +31,7 @@ export default async function update({
   options = {},
   verbose = false,
   forTrx = false,
-  autoTimeStamp = false
+  autoTimeStamp = false,
 }: IDLUpdate): Promise<IDLUpdateOutput> {
   let params;
   try {
@@ -58,7 +58,7 @@ export default async function update({
     const ExpressionAttributeValues = api.getExpressionAttributeValues(attributesUsedInExpression);
 
     const dbKeyNames = Object.keys(key);
-    const ConditionExpression = dbKeyNames.map(name => `#${name} = :${name}`).join(" AND ");
+    const ConditionExpression = dbKeyNames.map((name) => `#${name} = :${name}`).join(" AND ");
 
     params = api.mergeOptions(
       {
@@ -68,7 +68,7 @@ export default async function update({
         ExpressionAttributeNames,
         ExpressionAttributeValues,
         ...(!createIfNotExist && { ConditionExpression }),
-        ReturnValues
+        ReturnValues,
       },
       options
     );
@@ -81,7 +81,7 @@ export default async function update({
      */
     if (forTrx) {
       return {
-        Update: params
+        Update: params,
       };
     }
 

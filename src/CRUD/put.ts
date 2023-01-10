@@ -17,10 +17,10 @@ export default async function create({
   options = {},
   verbose = false,
   forTrx = false,
-  autoTimeStamp = false
+  autoTimeStamp = false,
 }: IDLPut) {
   const item = {
-    ...rawItem
+    ...rawItem,
   };
   if (autoTimeStamp) {
     const timeStamp = Date.now();
@@ -31,7 +31,7 @@ export default async function create({
   const params: PutCommandInput = {
     TableName: tableName,
     Item: item,
-    ...options
+    ...options,
   };
   if (verbose) {
     console.log("params", params);
@@ -43,7 +43,7 @@ export default async function create({
      */
     if (forTrx) {
       return {
-        Put: params
+        Put: params,
       };
     }
 
