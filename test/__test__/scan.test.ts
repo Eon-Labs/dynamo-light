@@ -12,8 +12,8 @@ const dynamoDBClientConfig: DynamoDBClientConfig = {
   endpoint: process.env.MOCK_DYNAMODB_ENDPOINT,
   credentials: {
     accessKeyId: "test",
-    secretAccessKey: "test"
-  }
+    secretAccessKey: "test",
+  },
 };
 
 beforeAll(() => {
@@ -52,7 +52,7 @@ test("scan with options: AttributesToGet and Limit", async () => {
   const options = {
     AttributesToGet: ["fileExtension", "transcribedAt"],
     Select: "SPECIFIC_ATTRIBUTES",
-    Limit: 5
+    Limit: 5,
   };
   const { Items: fetchedItems } = await tableWithMediumData.scan({}, options);
   expect(fetchedItems!.length).toBe(options.Limit);
@@ -74,7 +74,7 @@ test("scan with override region", async () => {
   const anotherRegion = "ap-northeast-1";
   const tableWithAnotherRegion = new Table("Clevo-Processed-Speech-Table", {
     ...dynamoDBClientConfig,
-    region: anotherRegion
+    region: anotherRegion,
   });
   const docClient = tableWithAnotherRegion.docClient;
   const spyDocClientCallDynamoDb = jest.spyOn(docClient, "send");

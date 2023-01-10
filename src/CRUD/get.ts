@@ -21,7 +21,7 @@ export default async function get({
   key,
   options = {},
   verbose = false,
-  forTrx = false
+  forTrx = false,
 }: IDLGet): Promise<IDLGetOutput> {
   /**
    * Param verification
@@ -35,7 +35,7 @@ export default async function get({
   const params: GetCommandInput = {
     TableName: tableName,
     Key: key,
-    ...options
+    ...options,
   };
   if (verbose) {
     console.log("params", params);
@@ -47,7 +47,7 @@ export default async function get({
      */
     if (forTrx) {
       return {
-        Get: params
+        Get: params,
       };
     }
 

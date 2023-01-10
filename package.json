@@ -7,7 +7,8 @@
   "scripts": {
     "build": "tsc",
     "test": "jest --config jestconfig.json",
-    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
+    "styleCheck": "prettier --check \"**/*.{ts,js,yml,json}\"",
+    "format": "prettier --write \"**/*.{ts,js,yml,json}\"",
     "lint": "tslint -p tsconfig.json",
     "prepare": "npm run build",
     "prepublishOnly": "npm test && npm run lint",

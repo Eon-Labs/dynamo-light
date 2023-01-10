@@ -15,7 +15,7 @@ export default async function deleteItem({
   key,
   options = {},
   verbose = false,
-  forTrx = false
+  forTrx = false,
 }: IDLDelete) {
   let params;
   try {
@@ -27,7 +27,7 @@ export default async function deleteItem({
       TableName: tableName,
       Key: key,
       ReturnValues,
-      ...options
+      ...options,
     };
     if (verbose) {
       console.log("params", params);
@@ -38,7 +38,7 @@ export default async function deleteItem({
      */
     if (forTrx) {
       return {
-        Delete: params
+        Delete: params,
       };
     }
 

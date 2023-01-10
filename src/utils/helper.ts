@@ -8,7 +8,7 @@ export function parseNewImageFromRecord(record) {
     throw new Error("Record is malformed");
   }
   const item = {};
-  Object.keys(record.dynamodb.NewImage).forEach(param => {
+  Object.keys(record.dynamodb.NewImage).forEach((param) => {
     if (!record.dynamodb.NewImage[param].N && !record.dynamodb.NewImage[param].S) {
       console.log(`record.dynamodb.NewImage[param], ${record.dynamodb.NewImage[param]}`);
       throw new Error("Record is malformed");
@@ -48,7 +48,7 @@ export function getUpdateExpression(newFields) {
   const nullFields = {};
   const addFields = {};
   const nonNullFields = {};
-  Object.keys(newFields).forEach(field => {
+  Object.keys(newFields).forEach((field) => {
     if (newFields[field] === null || newFields[field] === undefined) {
       nullFields[field] = null;
     } else if (field.startsWith("+")) {
@@ -99,7 +99,7 @@ export function getUpdateExpression(newFields) {
 
 function removePlusFromFieldNames(rawNewFields) {
   const newFields = {};
-  Object.keys(rawNewFields).forEach(field => {
+  Object.keys(rawNewFields).forEach((field) => {
     if (field.startsWith("+")) {
       newFields[field.substr(1)] = rawNewFields[field];
     } else {
@@ -196,7 +196,7 @@ export function buildKeyConditionExpressions({
   partitionKeyValue,
   sortKey,
   sortKeyOperator,
-  sortKeyValue
+  sortKeyValue,
 }) {
   const keyValueObj = {};
   keyValueObj[partitionKey] = partitionKeyValue;
@@ -209,7 +209,7 @@ export function buildKeyConditionExpressions({
   return {
     KeyConditionExpression,
     ExpressionAttributeNames,
-    ExpressionAttributeValues
+    ExpressionAttributeValues,
   };
 }
 
@@ -219,7 +219,7 @@ export function buildKeyConditionExpressions({
  * @param {string} exp2
  */
 function combineExpressions(exp1, exp2) {
-  const validExps = [exp1, exp2].filter(exp => exp && exp.length > 0);
+  const validExps = [exp1, exp2].filter((exp) => exp && exp.length > 0);
   return validExps.join(" AND ");
 }
 
@@ -241,12 +241,12 @@ export function mergeOptions(opt1, opt2) {
    */
   const combinedExpressionAttributeNames = {
     ...opt1.ExpressionAttributeNames,
-    ...opt2.ExpressionAttributeNames
+    ...opt2.ExpressionAttributeNames,
   };
 
   const combinedExpressionAttributeValues = {
     ...opt1.ExpressionAttributeValues,
-    ...opt2.ExpressionAttributeValues
+    ...opt2.ExpressionAttributeValues,
   };
 
   /**
@@ -254,14 +254,14 @@ export function mergeOptions(opt1, opt2) {
    */
   function getAllExpressionNames(opt) {
     const keys = Object.keys(opt);
-    return keys ? keys.filter(key => key.slice(-10) === "Expression") : [];
+    return keys ? keys.filter((key) => key.slice(-10) === "Expression") : [];
   }
 
   const expressionNameSet = new Set([...getAllExpressionNames(opt1), ...getAllExpressionNames(opt2)]);
   const expressionNames = Array.from(expressionNameSet);
 
   const combinedExpressions = {};
-  expressionNames.forEach(expName => {
+  expressionNames.forEach((expName) => {
     combinedExpressions[expName] = combineExpressions(opt1[expName], opt2[expName]);
   });
 
@@ -270,11 +270,11 @@ export function mergeOptions(opt1, opt2) {
     ...opt2,
     ...combinedExpressions,
     ...(combinedExpressionAttributeNames && {
-      ExpressionAttributeNames: combinedExpressionAttributeNames
+      ExpressionAttributeNames: combinedExpressionAttributeNames,
     }),
     ...(combinedExpressionAttributeValues && {
-      ExpressionAttributeValues: combinedExpressionAttributeValues
-    })
+      ExpressionAttributeValues: combinedExpressionAttributeValues,
+    }),
   };
 }
 
