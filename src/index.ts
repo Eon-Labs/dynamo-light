@@ -15,10 +15,12 @@ import transactWrite from "./CRUD/transactWrite";
 import updateItem from "./CRUD/update";
 import { DeleteItemInput, GetItemInput, PutItemInput, QueryInput, ScanInput, UpdateItemInput } from "./types";
 
+const defaultDocOptions = { marshallOptions: { removeUndefinedValues: true } };
+
 // Bare-bones DynamoDB Client are more modular and reduces bundle size and improve loading performance over full client "new DynamoDB({});"
 // Avoid using the full client because it may be dropped in the next major version.
 let dbClient = new DynamoDBClient({});
-let docClient = DynamoDBDocumentClient.from(dbClient);
+let docClient = DynamoDBDocumentClient.from(dbClient, defaultDocOptions);
 
 interface IIndex {
   name: string;
@@ -53,7 +55,7 @@ export class Table {
     this.indexMap = new Map();
     if (config) {
       this.dbClient = new DynamoDBClient(config);
-      this.docClient = DynamoDBDocumentClient.from(this.dbClient);
+      this.docClient = DynamoDBDocumentClient.from(this.dbClient, defaultDocOptions);
     } else {
       this.dbClient = dbClient;
       this.docClient = docClient;

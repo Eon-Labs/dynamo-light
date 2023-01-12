@@ -9,6 +9,7 @@ const composedKey = { categoryName: "查询扣款", fileNameBeginTime: "this is 
 const composedItem = { ...composedKey, something: "foo" };
 const simpleKey = { fileName: "20170623160058_966_13436475398_601_create" };
 const simpleItem = { ...simpleKey, userName: "Chris Lee", somethingElse: "hello world from create test" };
+const simpleItemWithUndefined = { ...simpleItem, anotherField: undefined };
 const existingKey = { fileName: "20170624144736_966_13889465270_601" };
 const existingItem = {
   fileName: "20170624144736_966_13889465270_601",
@@ -31,8 +32,8 @@ beforeAll(() => {
 
   Table.replaceDynamoClient(localDbClient, localDocClient);
 
-  tableWithPrimaryKey = new Table("Clevo-Processed-Speech-Table");
-  tableWithSortKey = new Table("Clevo-Categorized-Sentence-Table");
+  tableWithPrimaryKey = new Table("Clevo-Processed-Speech-Table", dynamoDBClientConfig);
+  tableWithSortKey = new Table("Clevo-Categorized-Sentence-Table", dynamoDBClientConfig);
 });
 
 test("put an item in partition table", async () => {
@@ -101,4 +102,15 @@ test("put with override region", async () => {
   expect(spyDocClientCallDynamoDb).toHaveBeenCalledTimes(1);
   await expect(docClient.config.region()).resolves.not.toBe(defaultRegion);
   await expect(docClient.config.region()).resolves.toBe(anotherRegion);
+});
+
+test("put with undefined fields", async () => {
+  // if the DynamoDB document client is not configured properly, an error will be thrown
+  // when trying to put an undefined field in the DynamoDB
+  await expect(tableWithPrimaryKey.put(simpleItemWithUndefined)).resolves.not.toThrow();
+  const result = await tableWithPrimaryKey.get(simpleKey);
+  expect(result.Item).not.toBeUndefined();
+  expect(result.Item?.userName).toBe(simpleItem.userName);
+  expect(result.Item?.somethingElse).toBe(simpleItem.somethingElse);
+  expect(result.Item?.anotherField).toBeUndefined();
 });
