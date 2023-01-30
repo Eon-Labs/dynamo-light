@@ -69,9 +69,22 @@ test("Query table in index with partitionKey, sortKey and sortKeyOperator", asyn
 });
 
 test("Query table in index with partitionKey, sortKey and sortKeyOperator BETWEEN", async () => {
-  const minCreatedAt = 1504293576;
-  const maxCreatedAt = 1504293776;
-  const totalItemsNum = 74;
+  // fetch all items to be used later in the test
+  const items = (
+    await tableWithIndexes.scan({
+      indexName: "organizationName-createdAt-index",
+      organizationName: "RunHua Group",
+    })
+  ).Items;
+  const minCreatedAt = Math.min(...items.map((item) => item.createdAt));
+  const maxCreatedAt = Math.max(...items.map((item) => item.createdAt));
+  const totalItemsNum = items.length;
+  // verify if the table has the correct data statistics
+  expect(minCreatedAt).toBe(1504293576);
+  expect(maxCreatedAt).toBe(1504293776);
+  expect(totalItemsNum).toBe(74);
+
+  // case1: between range is large, contains all items
   const case1 = await tableWithIndexes.query({
     indexName: "organizationName-createdAt-index",
     organizationName: "RunHua Group",
@@ -85,6 +98,7 @@ test("Query table in index with partitionKey, sortKey and sortKeyOperator BETWEE
   expect(max).toBe(maxCreatedAt);
   expect(case1.Items.length).toBe(totalItemsNum);
 
+  // case2: between starts from the middle of data range
   const start = minCreatedAt + (maxCreatedAt - minCreatedAt) / 2;
   const end = maxCreatedAt + 100;
   const case2 = await tableWithIndexes.query({
