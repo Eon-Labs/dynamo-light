@@ -161,7 +161,7 @@ await populationTable.query({
   country: "Canada",
   year: [1949, 1960],
   sortKeyOperator: "BETWEEN"
-}); // Returns canada population records whose year between 1949 and 1960 (inclusive)
+}); // Returns canada population records whose year is between 1949 and 1960 (inclusive)
 ```
 
 Here is a list of the available [sortKeyOperators](#available-sortkeyoperators).
