@@ -68,23 +68,37 @@ test("Query table in index with partitionKey, sortKey and sortKeyOperator", asyn
   expect(result.Items.length > 1).toBe(true);
 });
 
-test("Query table in index with partitionKey, sortKey and sortKeyOperator Between", async () => {
+test("Query table in index with partitionKey, sortKey and sortKeyOperator BETWEEN", async () => {
   const minCreatedAt = 1504293576;
   const maxCreatedAt = 1504293776;
-  const itemsLength = 74;
-  const result = await tableWithIndexes.query({
+  const totalItemsNum = 74;
+  const case1 = await tableWithIndexes.query({
     indexName: "organizationName-createdAt-index",
     organizationName: "RunHua Group",
     sortKeyOperator: "BETWEEN",
-    createdAt: [maxCreatedAt, minCreatedAt],
+    createdAt: [minCreatedAt, maxCreatedAt],
   });
-  const createdAtArr = result.Items.map((item) => item.createdAt);
+  const createdAtArr = case1.Items.map((item) => item.createdAt);
   const min = Math.min(...createdAtArr);
   const max = Math.max(...createdAtArr);
   expect(min).toBe(minCreatedAt);
   expect(max).toBe(maxCreatedAt);
-  expect(result.Items.length).toBe(itemsLength);
-  expect(result.Items.length > 1).toBe(true);
+  expect(case1.Items.length).toBe(totalItemsNum);
+
+  const start = minCreatedAt + (maxCreatedAt - minCreatedAt) / 2;
+  const end = maxCreatedAt + 100;
+  const case2 = await tableWithIndexes.query({
+    indexName: "organizationName-createdAt-index",
+    organizationName: "RunHua Group",
+    sortKeyOperator: "BETWEEN",
+    createdAt: [start, end],
+  });
+  const createdAtArr2 = case2.Items.map((item) => item.createdAt);
+  const min2 = Math.min(...createdAtArr2);
+  const max2 = Math.max(...createdAtArr2);
+  expect(min2).toBeGreaterThanOrEqual(start);
+  expect(max2).toBeLessThan(end);
+  expect(case2.Items.length).toBeLessThan(totalItemsNum);
 });
 
 test("Query table with default region", async () => {
