@@ -68,6 +68,25 @@ test("Query table in index with partitionKey, sortKey and sortKeyOperator", asyn
   expect(result.Items.length > 1).toBe(true);
 });
 
+test("Query table in index with partitionKey, sortKey and sortKeyOperator Between", async () => {
+  const minCreatedAt = 1504293576;
+  const maxCreatedAt = 1504293776;
+  const itemsLength = 74;
+  const result = await tableWithIndexes.query({
+    indexName: "organizationName-createdAt-index",
+    organizationName: "RunHua Group",
+    sortKeyOperator: "BETWEEN",
+    createdAt: [maxCreatedAt, minCreatedAt],
+  });
+  const createdAtArr = result.Items.map((item) => item.createdAt);
+  const min = Math.min(...createdAtArr);
+  const max = Math.max(...createdAtArr);
+  expect(min).toBe(minCreatedAt);
+  expect(max).toBe(maxCreatedAt);
+  expect(result.Items.length).toBe(itemsLength);
+  expect(result.Items.length > 1).toBe(true);
+});
+
 test("Query table with default region", async () => {
   const docClient = tableWithSmallData.docClient;
   const spyDocClientCallDynamoDb = jest.spyOn(docClient, "send");
