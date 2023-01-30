@@ -99,8 +99,8 @@ test("Query table in index with partitionKey, sortKey and sortKeyOperator BETWEE
   expect(case1.Items.length).toBe(totalItemsNum);
 
   // case2: between starts from the middle of data range
-  const start = minCreatedAt + (maxCreatedAt - minCreatedAt) / 2;
-  const end = maxCreatedAt + 100;
+  const start = minCreatedAt + (maxCreatedAt - minCreatedAt) / 2; // (1504293776 - 1504293576) / 2
+  const end = maxCreatedAt + 100; // 1504293776 + 100
   const case2 = await tableWithIndexes.query({
     indexName: "organizationName-createdAt-index",
     organizationName: "RunHua Group",
