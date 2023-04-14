@@ -2,8 +2,8 @@ import { DynamoDBClient, DynamoDBClientConfig } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import { Table } from "../../src/index";
 
-let tableWithPrimaryKey;
-let tableWithSortKey;
+let tableWithPrimaryKey: Table;
+let tableWithSortKey: Table;
 console.error = jest.fn();
 
 const simpleKeyStr = "20170630182315_966_15842646466_601";

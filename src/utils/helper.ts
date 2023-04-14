@@ -1,19 +1,23 @@
+import type { QueryCommandOutput } from "@aws-sdk/lib-dynamodb";
+import type { _Record } from "@aws-sdk/client-dynamodb-streams";
+
 /**
  * Get new Image from DynamoDB Stream event, and parse it into a flat object
  * @param {*} record Record from DyanmoDB stream event
  */
-export function parseNewImageFromRecord(record) {
+export function parseNewImageFromRecord(record: _Record) {
   if (!record || !record.dynamodb || !record.dynamodb.NewImage) {
     console.log(`Record is malformed, ${JSON.stringify(record)}`);
     throw new Error("Record is malformed");
   }
-  const item = {};
+  const item: Record<string, string | number> = {};
   Object.keys(record.dynamodb.NewImage).forEach((param) => {
+    if (!record.dynamodb?.NewImage) return;
     if (!record.dynamodb.NewImage[param].N && !record.dynamodb.NewImage[param].S) {
       console.log(`record.dynamodb.NewImage[param], ${record.dynamodb.NewImage[param]}`);
       throw new Error("Record is malformed");
     }
-    item[param] = record.dynamodb.NewImage[param].S || parseFloat(record.dynamodb.NewImage[param].N);
+    item[param] = record.dynamodb.NewImage[param].S || parseFloat(record.dynamodb.NewImage[param].N ?? "");
   });
   return item;
 }
@@ -21,14 +25,17 @@ export function parseNewImageFromRecord(record) {
 /**
  * Concat fetch results from query or scan operations - currently it concats Items only, TODO: concats other properties such as count
  */
-export function concatBatchFetchResult(prevResult, fetchedData) {
+export function concatBatchFetchResult(prevResult: QueryCommandOutput | undefined, fetchedData: QueryCommandOutput) {
   if (!prevResult) {
     return fetchedData;
   }
   const result = prevResult;
-  result.Items = prevResult.Items.concat(fetchedData.Items);
-  result.Count += fetchedData.Count;
-  result.ScannedCount += fetchedData.ScannedCount;
+  result.Count = result.Count ?? 0;
+  result.ScannedCount = result.ScannedCount ?? 0;
+
+  result.Items = prevResult.Items?.concat(fetchedData.Items ?? []);
+  result.Count += fetchedData.Count ?? 0;
+  result.ScannedCount += fetchedData.ScannedCount ?? 0;
   result.LastEvaluatedKey = fetchedData.LastEvaluatedKey;
   return result;
 }
@@ -37,7 +44,7 @@ export function concatBatchFetchResult(prevResult, fetchedData) {
  * Get params for DynamoDB table update calls
  * @param newFields
  */
-export function getUpdateExpression(newFields) {
+export function getUpdateExpression(newFields: { [key: string]: any }) {
   let UpdateExpression = "";
   /**
    * Separate null and non-null fields,
@@ -45,14 +52,14 @@ export function getUpdateExpression(newFields) {
    * for fields that starts with + use ADD
    * for other non-null fields use SET,
    */
-  const nullFields = {};
-  const addFields = {};
-  const nonNullFields = {};
+  const nullFields: { [key: string]: null } = {};
+  const addFields: { [key: string]: any } = {};
+  const nonNullFields: { [key: string]: NonNullable<any> } = {};
   Object.keys(newFields).forEach((field) => {
     if (newFields[field] === null || newFields[field] === undefined) {
       nullFields[field] = null;
     } else if (field.startsWith("+")) {
-      addFields[field.substr(1)] = newFields[field];
+      addFields[field.substring(1)] = newFields[field];
     } else {
       nonNullFields[field] = newFields[field];
     }
@@ -97,11 +104,11 @@ export function getUpdateExpression(newFields) {
   return UpdateExpression;
 }
 
-function removePlusFromFieldNames(rawNewFields) {
-  const newFields = {};
+function removePlusFromFieldNames(rawNewFields: { [key: string]: any }) {
+  const newFields: { [key: string]: any } = {};
   Object.keys(rawNewFields).forEach((field) => {
     if (field.startsWith("+")) {
-      newFields[field.substr(1)] = rawNewFields[field];
+      newFields[field.substring(1)] = rawNewFields[field];
     } else {
       newFields[field] = rawNewFields[field];
     }
@@ -109,18 +116,18 @@ function removePlusFromFieldNames(rawNewFields) {
   return newFields;
 }
 
-export function getExpressionAttributeNames(rawNewFields) {
+export function getExpressionAttributeNames(rawNewFields: { [key: string]: any }) {
   const newFields = removePlusFromFieldNames(rawNewFields);
-  const ExpressionAttributeNames = {};
+  const ExpressionAttributeNames: { [key: string]: string } = {};
   for (const fieldKey of Object.keys(newFields)) {
     ExpressionAttributeNames[`#${fieldKey}`] = fieldKey;
   }
   return ExpressionAttributeNames;
 }
 
-export function getExpressionAttributeValues(rawNewFields, sortKeyOperator?: string) {
+export function getExpressionAttributeValues(rawNewFields: { [key: string]: any }, sortKeyOperator?: string) {
   const newFields = removePlusFromFieldNames(rawNewFields);
-  const ExpressionAttributeValues = {};
+  const ExpressionAttributeValues: { [key: string]: any } = {};
   const operatorIsBetween = typeof sortKeyOperator === "string" && sortKeyOperator.toLowerCase() === "between";
   let foundSortKey = false;
 
@@ -144,12 +151,20 @@ export function getExpressionAttributeValues(rawNewFields, sortKeyOperator?: str
   return ExpressionAttributeValues;
 }
 
-function getKeyConditionExpression({ partitionKey, sortKey, sortKeyOperator: rawSortKeyOperator }) {
+function getKeyConditionExpression({
+  partitionKey,
+  sortKey,
+  sortKeyOperator: rawSortKeyOperator,
+}: {
+  partitionKey: string;
+  sortKey: string;
+  sortKeyOperator: string | undefined;
+}) {
   const partitionKeyExpression = `#${partitionKey} = :${partitionKey}`;
   let sortKeyExpression;
   if (sortKey) {
-    let sortKeyOperator = rawSortKeyOperator.toLowerCase();
-    if (sortKeyOperator.includes("begin") && sortKeyOperator.includes("with")) {
+    let sortKeyOperator = rawSortKeyOperator?.toLowerCase();
+    if (sortKeyOperator && sortKeyOperator.includes("begin") && sortKeyOperator.includes("with")) {
       sortKeyOperator = "beginswith";
     }
     switch (sortKeyOperator) {
@@ -197,8 +212,14 @@ export function buildKeyConditionExpressions({
   sortKey,
   sortKeyOperator,
   sortKeyValue,
+}: {
+  partitionKey: string;
+  partitionKeyValue: any;
+  sortKey: string;
+  sortKeyOperator: string | undefined;
+  sortKeyValue: any;
 }) {
-  const keyValueObj = {};
+  const keyValueObj: { [key: string]: any } = {};
   keyValueObj[partitionKey] = partitionKeyValue;
   if (sortKey) {
     keyValueObj[sortKey] = sortKeyValue;
@@ -218,7 +239,7 @@ export function buildKeyConditionExpressions({
  * @param {string} exp1
  * @param {string} exp2
  */
-function combineExpressions(exp1, exp2) {
+function combineExpressions(exp1: string, exp2: string) {
   const validExps = [exp1, exp2].filter((exp) => exp && exp.length > 0);
   return validExps.join(" AND ");
 }
@@ -228,7 +249,7 @@ function combineExpressions(exp1, exp2) {
  * Supports merging all dyanmodb expressions (filter, keyCondition, etc) and ExpressionAttributeNames, ExpressionAttributeValues,
  * For all the other params: opt2 will overwrite opt1
  */
-export function mergeOptions(opt1, opt2) {
+export function mergeOptions(opt1: { [key: string]: any }, opt2: { [key: string]: any }) {
   if (!opt1) {
     return opt2;
   }
@@ -252,7 +273,7 @@ export function mergeOptions(opt1, opt2) {
   /**
    * Combine Expressions
    */
-  function getAllExpressionNames(opt) {
+  function getAllExpressionNames(opt: { [key: string]: any }) {
     const keys = Object.keys(opt);
     return keys ? keys.filter((key) => key.slice(-10) === "Expression") : [];
   }
@@ -260,7 +281,7 @@ export function mergeOptions(opt1, opt2) {
   const expressionNameSet = new Set([...getAllExpressionNames(opt1), ...getAllExpressionNames(opt2)]);
   const expressionNames = Array.from(expressionNameSet);
 
-  const combinedExpressions = {};
+  const combinedExpressions: { [key: string]: string } = {};
   expressionNames.forEach((expName) => {
     combinedExpressions[expName] = combineExpressions(opt1[expName], opt2[expName]);
   });
@@ -282,9 +303,9 @@ export function mergeOptions(opt1, opt2) {
  * Prepare args to be ready for inserting into DynamoDB
  * @param args
  */
-export function removeInvalidArgs(args) {
+export function removeInvalidArgs(args: any[]) {
   const newArgs = [...args];
-  for (const key of Object.keys(args)) {
+  for (const key in args) {
     const isEmptyString = typeof args[key] === "string" && args[key].length === 0;
     const isNull = args[key] === null;
     if (isNull || isEmptyString) {

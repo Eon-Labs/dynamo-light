@@ -6,7 +6,7 @@
     "declaration": true,
     "outDir": "./lib",
     "strict": true,
-    "noImplicitAny": false
+    "noImplicitAny": true
   },
   "include": ["src", "src/test"],
   "exclude": ["node_modules", "**/__tests__/*"]

@@ -2,8 +2,8 @@ import { DynamoDBClient, DynamoDBClientConfig } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import { Table } from "../../src/index";
 
-let tableWithPrimaryKey;
-let tableWithSortKey;
+let tableWithPrimaryKey: Table;
+let tableWithSortKey: Table;
 
 const composedKey = { categoryName: "其他", fileNameBeginTime: "20170623152601_966_15876378734_601.wav-27010" };
 const simpleKeyStr = "20170628135402_966_15940025466_601";

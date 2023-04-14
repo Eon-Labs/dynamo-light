@@ -2,8 +2,8 @@ import { DynamoDBClient, DynamoDBClientConfig } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import { Table } from "../../src/index";
 
-let tableWithSmallData;
-let tableWithMediumData;
+let tableWithSmallData: Table;
+let tableWithMediumData: Table;
 console.error = jest.fn();
 
 const defaultRegion = "us-west-2";

@@ -225,16 +225,14 @@ export class Table {
     let sortKey;
     sortKey = index ? index.sortKey : this.sortKey;
     // 如果sortKeyValue不存在，则设置sortKey为undefined
-    if (queryKey[sortKey] === undefined && queryKey.sortKeyValue === undefined) {
+    if (sortKey === undefined || (queryKey[sortKey] === undefined && queryKey.sortKeyValue === undefined)) {
       sortKey = undefined;
-    } else {
-      if (sortKeyOperator === undefined) {
-        sortKeyOperator = "=";
-      }
+    } else if (sortKeyOperator === undefined) {
+      sortKeyOperator = "=";
     }
 
     // 智能填partitionKeyValue和sortKeyValue
-    if (partitionKeyValue === undefined) {
+    if (partitionKey && partitionKeyValue === undefined) {
       if (queryKey[partitionKey] !== undefined) {
         partitionKeyValue = queryKey[partitionKey];
         delete queryKey[partitionKey];
@@ -310,7 +308,7 @@ export class Table {
    * Retrieve options specified by DL(dynamo-light), and remove them from the option param
    * @param options
    */
-  private retrieveAndDeleteDLOptions(options) {
+  private retrieveAndDeleteDLOptions(options: { verbose?: boolean, forTrx?: boolean, autoTimeStamp?: boolean, pagination?: boolean }) {
     const { verbose = false, forTrx = false, autoTimeStamp = false, pagination = true } = options;
     delete options.verbose;
     delete options.forTrx;
