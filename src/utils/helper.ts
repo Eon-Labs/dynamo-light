@@ -12,7 +12,9 @@ export function parseNewImageFromRecord(record: _Record) {
   }
   const item: Record<string, string | number> = {};
   Object.keys(record.dynamodb.NewImage).forEach((param) => {
-    if (!record.dynamodb?.NewImage) return;
+    if (!record.dynamodb?.NewImage) {
+      return;
+    }
     if (!record.dynamodb.NewImage[param].N && !record.dynamodb.NewImage[param].S) {
       console.log(`record.dynamodb.NewImage[param], ${record.dynamodb.NewImage[param]}`);
       throw new Error("Record is malformed");

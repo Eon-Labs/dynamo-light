@@ -308,7 +308,12 @@ export class Table {
    * Retrieve options specified by DL(dynamo-light), and remove them from the option param
    * @param options
    */
-  private retrieveAndDeleteDLOptions(options: { verbose?: boolean, forTrx?: boolean, autoTimeStamp?: boolean, pagination?: boolean }) {
+  private retrieveAndDeleteDLOptions(options: {
+    verbose?: boolean;
+    forTrx?: boolean;
+    autoTimeStamp?: boolean;
+    pagination?: boolean;
+  }) {
     const { verbose = false, forTrx = false, autoTimeStamp = false, pagination = true } = options;
     delete options.verbose;
     delete options.forTrx;

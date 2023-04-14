@@ -15,7 +15,7 @@ function convertNode(nodeName, nodeValue) {
     case "L":
       convertedValue = [];
       for (let i = 0; i < thisValue.length; i++) {
-        convertedValue.push(convertNode(`${nodeName}\$${i}`, thisValue[i]));
+        convertedValue.push(convertNode(`${nodeName}$${i}`, thisValue[i]));
       }
       break;
     case "M":
