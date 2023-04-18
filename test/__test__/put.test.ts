@@ -2,8 +2,8 @@ import { DynamoDBClient, DynamoDBClientConfig } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import { Table } from "../../src/index";
 
-let tableWithPrimaryKey;
-let tableWithSortKey;
+let tableWithPrimaryKey: Table;
+let tableWithSortKey: Table;
 
 const composedKey = { categoryName: "查询扣款", fileNameBeginTime: "this is a field from create test" };
 const composedItem = { ...composedKey, something: "foo" };

@@ -3,8 +3,8 @@ import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import Big from "big.js";
 import { Table } from "../../src/index";
 
-let tableWithPrimaryKey;
-let tableWithSortKey;
+let tableWithPrimaryKey: Table;
+let tableWithSortKey: Table;
 
 const simpleKeyStr = "20170630180016_966_13610827935_601";
 const simpleKey = { fileName: simpleKeyStr };

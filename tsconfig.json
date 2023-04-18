@@ -1,4 +1,5 @@
 {
+  "extends": "@tsconfig/node-lts/tsconfig.json",
   "compilerOptions": {
     "allowJs": true,
     "target": "es6",
@@ -6,7 +7,7 @@
     "declaration": true,
     "outDir": "./lib",
     "strict": true,
-    "noImplicitAny": false
+    "noImplicitAny": true
   },
   "include": ["src", "src/test"],
   "exclude": ["node_modules", "**/__tests__/*"]
