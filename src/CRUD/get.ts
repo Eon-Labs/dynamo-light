@@ -1,5 +1,4 @@
 import { GetCommand, GetCommandInput, GetCommandOutput } from "@aws-sdk/lib-dynamodb";
-import { ResponseMetadata } from "@aws-sdk/types/dist-types/response";
 import { IDLArgumentsBase } from "../types";
 
 interface IDLGet extends IDLArgumentsBase<GetCommandInput> {
@@ -9,7 +8,7 @@ interface IDLGet extends IDLArgumentsBase<GetCommandInput> {
 
 export interface IDLGetOutput extends Omit<GetCommandOutput, "$metadata"> {
   Get?: GetCommandInput; // only when forTrx == true
-  $metadata?: ResponseMetadata;
+  $metadata?: GetCommandOutput["$metadata"];
 }
 
 /**

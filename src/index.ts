@@ -28,6 +28,9 @@ interface IIndex {
   sortKey: string | undefined;
 }
 
+// The option types in ./types accept any string for DynamoDB enum fields (ReturnConsumedCapacity,
+// ConditionalOperator, ...) and the options go to the SDK unchanged; the SDK's own types narrowed those
+// fields to string unions, hence `options as any` at each CRUD call below.
 export class Table {
   public static transactWrite(transactions: any, options = { verbose: false }) {
     const { verbose } = options;
@@ -130,7 +133,14 @@ export class Table {
 
     const { verbose, forTrx } = this.retrieveAndDeleteDLOptions(options);
 
-    return getItem({ docClient: this.docClient, tableName: this.tableName, key, options, verbose, forTrx });
+    return getItem({
+      docClient: this.docClient,
+      tableName: this.tableName,
+      key,
+      options: options as any,
+      verbose,
+      forTrx,
+    });
   }
 
   public async put(item: any, options: PutItemInput = {}) {
@@ -143,7 +153,7 @@ export class Table {
       docClient: this.docClient,
       tableName: this.tableName,
       item,
-      options,
+      options: options as any,
       verbose,
       forTrx,
       autoTimeStamp,
@@ -165,7 +175,14 @@ export class Table {
 
     const { verbose, forTrx } = this.retrieveAndDeleteDLOptions(options);
 
-    return deleteItem({ docClient: this.docClient, tableName: this.tableName, key, options, verbose, forTrx });
+    return deleteItem({
+      docClient: this.docClient,
+      tableName: this.tableName,
+      key,
+      options: options as any,
+      verbose,
+      forTrx,
+    });
   }
 
   public async update(key: any, newFields: any, options: UpdateItemInput = {}) {
@@ -188,7 +205,7 @@ export class Table {
       key,
       tableName: this.tableName,
       newFields,
-      options,
+      options: options as any,
       verbose,
       forTrx,
       autoTimeStamp,
@@ -257,7 +274,7 @@ export class Table {
       sortKey,
       sortKeyOperator,
       sortKeyValue,
-      options,
+      options: options as any,
       pagination,
       verbose,
     });
@@ -275,7 +292,7 @@ export class Table {
       docClient: this.docClient,
       tableName: this.tableName,
       indexName,
-      options,
+      options: options as any,
       pagination,
       verbose,
     });
