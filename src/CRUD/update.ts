@@ -1,7 +1,6 @@
 import { UpdateCommand, UpdateCommandInput, UpdateCommandOutput } from "@aws-sdk/lib-dynamodb";
 import { IDLArgumentsBase } from "../types";
 
-import { ResponseMetadata } from "@aws-sdk/types/dist-types/response";
 import * as api from "../utils/helper";
 
 interface IDLUpdateOptions extends UpdateCommandInput {
@@ -17,7 +16,7 @@ interface IDLUpdate extends IDLArgumentsBase<IDLUpdateOptions> {
 
 export interface IDLUpdateOutput extends Omit<UpdateCommandOutput, "$metadata"> {
   Update?: UpdateCommandInput; // only when forTrx == true
-  $metadata?: ResponseMetadata;
+  $metadata?: UpdateCommandOutput["$metadata"];
 }
 
 /**
